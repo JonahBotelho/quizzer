@@ -12,6 +12,7 @@
 
 ## Code style
 
+- Write clean, concise and human readible code.
 - Use descriptive names and keep classes and functions focused.
 - Use two-space indentation and one statement per line. Separate imports, declarations, and logical steps with blank lines; expand dense code rather than compressing it to meet line targets.
 - Aim for files under 300 lines and functions under 30 lines; use judgement when splitting would reduce clarity. Describe each source file's purpose at the top.
