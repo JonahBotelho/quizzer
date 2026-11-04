@@ -23,6 +23,7 @@ export function App() {
     {library.notice && <p className="notice" role="status">{t(library.notice)}</p>}
     {!state.ready ? <p role="status" className="loading">{t('loading')}</p> : <>
       {screen === 'setup' && <Setup banks={library.banks} importReady={library.ready} onImport={library.importFile}
+        onSaveGenerated={library.saveGenerated}
         active={state.active} busy={state.saving} onStart={flow.start} onResume={flow.resume} onDiscard={flow.discard} />}
       {screen === 'quiz' && state.active && <Quiz attempt={state.active} busy={state.saving}
         onAnswer={(position, answer) => { void sessionStore.answer(state.active!.id, position, answer); }}

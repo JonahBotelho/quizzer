@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { ArrowRight, BookOpen, Check, RotateCcw, Layers3 } from 'lucide-react';
 import { QuizFiles } from './QuizFiles';
+import { GenerateQuiz } from './GenerateQuiz';
+import { GeneratedDownload } from './GeneratedDownload';
+import type { SaveGenerated } from '../hooks/useQuizGeneration';
 import { TimeLimitSetup } from './TimeLimitSetup';
 import { isSetupTimeLimit, noTimeLimit } from '../core/timing';
 import type { TimeLimit } from '../core/timingTypes';
@@ -11,11 +14,12 @@ import { quizLengths, resolveQuestionCount, type QuizLength } from '../core/quiz
 import { unanswered } from '../core/quiz';
 import type { Attempt, Bank } from '../core/types';
 import { number, t } from '../i18n';
-interface Props { banks: Bank[]; importReady: boolean; onImport(file: File): Promise<Bank>; active: Attempt | null; busy: boolean; onStart(bank: Bank, count: number, limit: TimeLimit): void; onResume(): void; onDiscard(): void }
-export function Setup({ banks, importReady, onImport, active, busy, onStart, onResume, onDiscard }: Props) {
+interface Props { banks: Bank[]; importReady: boolean; onImport(file: File): Promise<Bank>; onSaveGenerated: SaveGenerated; active: Attempt | null; busy: boolean; onStart(bank: Bank, count: number, limit: TimeLimit): void; onResume(): void; onDiscard(): void }
+export function Setup({ banks, importReady, onImport, onSaveGenerated, active, busy, onStart, onResume, onDiscard }: Props) {
   const [bankId, setBankId] = useState(banks[0]?.id ?? '');
   const [length, setLength] = useState<QuizLength>(10);
   const [limit, setLimit] = useState<TimeLimit>(noTimeLimit);
+  const [generatedName, setGeneratedName] = useState<string | null>(null);
   const bank = banks.find(item => item.id === bankId) ?? banks[0];
   const count = resolveQuestionCount(length, bank?.questions.length ?? 0);
   function selectBank(next: Bank) {
@@ -24,16 +28,23 @@ export function Setup({ banks, importReady, onImport, active, busy, onStart, onR
   return <div className="setup-content">
     {active && <section className="resume-card"><div className="resume-icon"><RotateCcw size={21} /></div><div className="grow"><h2>{t('activeTitle')}</h2><p>{t('activeMeta', { bank: active.bankName, answered: number(active.questions.length - unanswered(active).length), total: number(active.questions.length) })}</p></div><button className="text-button" disabled={busy} onClick={onDiscard}>{t('discard')}</button><button className="button small" onClick={onResume}>{t('resume')}<ArrowRight size={16} /></button></section>}
     {catalog.errors.length > 0 && <details className="bank-errors"><summary>{t('bankErrors')}</summary><ul>{catalog.errors.map(error => <li key={error}>{error}</li>)}</ul></details>}
-    <QuizFiles ready={importReady} onImport={onImport} onImported={selectBank} />
+    <QuizFiles ready={importReady} onImport={onImport} onImported={selectBank}
+      generation={<GenerateQuiz ready={importReady} onSave={onSaveGenerated} onGenerated={next => {
+        selectBank(next);
+        setLength('all');
+        setGeneratedName(t('generationSuccess', { name: next.name, count: number(next.questions.length) }));
+      }} />} />
+    {generatedName && <p className="file-success generation-success" role="status">{generatedName}</p>}
     {bank ? <section className="setup-card">
       <div className="section-label"><span className="step">{t('stepOne')}</span><div><h2 id="banks-heading">{t('chooseBank')}</h2></div></div>
       <div className="bank-grid" role="radiogroup" aria-labelledby="banks-heading">
         {banks.map(item => <label className={`bank-option ${bank.id === item.id ? 'selected' : ''}`} key={item.id}>
           <input type="radio" name="bank" value={item.id} checked={bank.id === item.id} onChange={() => selectBank(item)} />
-          <div className="bank-icon"><BookOpen size={23} strokeWidth={1.7} /></div><span className="bank-text"><strong>{item.name}</strong><span>{t('questions', { count: number(item.questions.length) })}{item.sample && <span className="sample-badge">{t('sample')}</span>}{item.imported && <span className="sample-badge">{t('importedBadge')}</span>}</span></span>
+          <div className="bank-icon"><BookOpen size={23} strokeWidth={1.7} /></div><span className="bank-text"><strong>{item.name}</strong><span>{t('questions', { count: number(item.questions.length) })}{item.sample && <span className="sample-badge">{t('sample')}</span>}{item.imported && <span className="sample-badge">{t(item.source === 'generated' ? 'generatedBadge' : 'importedBadge')}</span>}</span></span>
           <span className="radio-mark">{bank.id === item.id && <Check size={12} strokeWidth={3} />}</span>
         </label>)}
       </div>
+      {bank.source === 'generated' && <GeneratedDownload key={bank.id} bank={bank} />}
       <div className="section-divider" />
       <div className="section-label"><span className="step">{t('stepTwo')}</span><div><h2 id="length-heading">{t('chooseLength')}</h2></div></div>
       <div className="length-grid" role="radiogroup" aria-labelledby="length-heading">{quizLengths.map(choice => <label className={`length-option ${length === choice ? 'selected' : ''}`} key={choice}>

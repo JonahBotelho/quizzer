@@ -4,4 +4,8 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .sites-runtime/
+.vercel/
+.env
+.env.*
+!.env.example
 src/data/quizzes/

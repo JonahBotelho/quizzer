@@ -5,7 +5,8 @@ import storage from './locales/en-CA/storage.json';
 import banks from './locales/en-CA/banks.json';
 import timing from './locales/en-CA/timing.json';
 import quizImport from './locales/en-CA/import.json';
-const messages = { ...app, ...quiz, ...storage, ...banks, ...timing, ...quizImport };
+import generation from './locales/en-CA/generation.json';
+const messages = { ...app, ...quiz, ...storage, ...banks, ...timing, ...quizImport, ...generation };
 export type MessageKey = keyof typeof messages;
 export const locale = 'en-CA';
 export function t(key: MessageKey, values: Record<string, string | number> = {}): string {

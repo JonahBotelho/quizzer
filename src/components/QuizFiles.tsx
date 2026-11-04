@@ -1,12 +1,12 @@
 /** Import a local file or download an importable, formatted JSON example. */
-import { useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Download, Upload } from 'lucide-react';
 import sampleUrl from '../data/sample-quiz.json?url';
 import type { Bank } from '../core/types';
 import { importErrorMessage } from '../core/importError';
 import { number, t } from '../i18n';
-interface Props { ready: boolean; onImport(file: File): Promise<Bank>; onImported(bank: Bank): void }
-export function QuizFiles({ ready, onImport, onImported }: Props) {
+interface Props { ready: boolean; onImport(file: File): Promise<Bank>; onImported(bank: Bank): void; generation?: ReactNode }
+export function QuizFiles({ ready, onImport, onImported, generation }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +24,7 @@ export function QuizFiles({ ready, onImport, onImported }: Props) {
     <div className="file-toolbar"><div><h2 id="files-title">{t('filesTitle')}</h2><p>{t('filesHint')}</p></div><div className="file-actions">
       <button className="button secondary small" disabled={!ready || pending} onClick={() => input.current?.click()}><Upload size={15} />{t(pending ? 'importingQuiz' : 'importQuiz')}</button>
       <a className="button secondary small" href={sampleUrl} download="quizzer-sample.json"><Download size={15} />{t('downloadSample')}</a>
+      {generation}
     </div></div>
     <input id="quiz-import" type="file" accept=".json,application/json" ref={input} hidden onChange={event => { void selectFile(event.target.files?.[0]); }} />
     <p className="file-format-hint">{t('importFormatHint')}</p>

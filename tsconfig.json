@@ -5,5 +5,5 @@
     "allowImportingTsExtensions": true, "isolatedModules": true, "noEmit": true, "types": ["vite/client", "node"],
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo"
   },
-  "include": ["src", "vite.config.ts", "playwright.config.ts", "e2e"]
+  "include": ["src", "server", "api", "build", "vite.config.ts", "playwright.config.ts", "e2e"]
 }

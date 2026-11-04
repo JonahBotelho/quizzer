@@ -1,7 +1,9 @@
 /** Combines bundled and browser-imported banks for setup and repeat attempts. */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { catalog } from '../catalog';
-import { importBank, type ImportedBank } from '../core/importBank';
+import { createLocalBank, importBank, type ImportedBank } from '../core/importBank';
+import { validateGeneratedQuestions } from '../core/generation';
+import type { Question } from '../core/types';
 import { withCombinedBank } from '../core/combinedBank';
 import { QuizImportError } from '../core/importError';
 import { BankRepository } from '../storage/bankRepository';
@@ -12,6 +14,8 @@ export function useBankLibrary() {
   const [notice, setNotice] = useState<MessageKey | null>(null);
   const repository = useRef<BankRepository | null>(null);
   const channel = useRef<BroadcastChannel | null>(null);
+  const latestBanks = useRef<ImportedBank[]>([]);
+  const pendingBanks = useRef(new Map<string, ImportedBank>());
   useEffect(() => {
     let disposed = false;
     async function refresh() {
@@ -21,7 +25,11 @@ export function useBankLibrary() {
         const saved = await opened.load();
         // Ignore in-flight reads after unmount or a write failure switches to memory.
         if (!disposed && repository.current === opened) {
-          setImports(saved.banks); if (saved.invalid) setNotice('libraryInvalid');
+          const merged = new Map(saved.banks.map(bank => [bank.id, bank]));
+          for (const bank of pendingBanks.current.values()) merged.set(bank.id, bank);
+          latestBanks.current = [...merged.values()];
+          setImports(latestBanks.current);
+          if (saved.invalid) setNotice('libraryInvalid');
         }
       } catch {
         if (!disposed && repository.current === opened) {
@@ -50,14 +58,29 @@ export function useBankLibrary() {
   async function importFile(file: File) {
     let raw: string;
     try { raw = await file.text(); } catch { throw new QuizImportError('importReadFailed', { file: file.name }); }
-    const bank = importBank(file.name, raw, banks);
+    return saveBank(importBank(file.name, raw, withCombinedBank([...catalog.banks, ...latestBanks.current])));
+  }
+  async function saveGenerated(title: string, questions: Question[]) {
+    const validated = validateGeneratedQuestions(questions, questions.length);
+    const bank = createLocalBank(title.trim(), validated, withCombinedBank([...catalog.banks, ...latestBanks.current]), true);
+    return saveBank(bank);
+  }
+  async function saveBank(bank: ImportedBank) {
+    pendingBanks.current.set(bank.id, bank);
+    latestBanks.current = [...latestBanks.current, bank];
     const opened = repository.current;
     if (opened) {
       try { await opened.add(bank); channel.current?.postMessage('changed'); }
-      catch { opened.close(); repository.current = null; setNotice('librarySaveFailed'); }
+      catch {
+        opened.close();
+        repository.current = null;
+        setNotice(bank.source === 'generated' ? 'generationTemporary' : 'librarySaveFailed');
+      }
     }
+    if (!repository.current && bank.source === 'generated') setNotice('generationTemporary');
+    pendingBanks.current.delete(bank.id);
     setImports(current => [...current.filter(item => item.id !== bank.id), bank]);
     return bank;
   }
-  return { banks, ready, notice, importFile };
+  return { banks, ready, notice, importFile, saveGenerated };
 }
