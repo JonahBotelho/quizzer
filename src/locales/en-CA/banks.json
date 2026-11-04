@@ -1,0 +1,13 @@
+{
+  "allBanks": "All",
+  "bankParse": "{file}: invalid JSON. Check commas, quotes, and brackets.",
+  "bankEmpty": "expected a nonempty array of questions.",
+  "bankFileError": "{file}: {reason}",
+  "bankEntry": "entry {entry}: {reason}",
+  "bankObject": "expected a question object.",
+  "bankId": "ID must be a unique safe integer within this bank.",
+  "bankQuestion": "question must be nonblank text or a nonempty array of text/code blocks.",
+  "bankOptions": "options must contain at least two nonblank strings.",
+  "bankAnswer": "answer must be an integer from 1 to the number of options.",
+  "bankQuestionBlock": "question block {block} must have type \"text\" with nonblank text, or type \"code\" with nonblank code."
+}

@@ -1,0 +1,13 @@
+{
+  "ajax": "AJAX",
+  "databases-sql": "Databases and SQL",
+  "html-css": "HTML and CSS",
+  "internet-architectures": "Internet Architectures",
+  "javascript-async": "Asynchronous JavaScript",
+  "javascript-basics": "JavaScript Basics",
+  "json": "JSON",
+  "nodejs": "Node.js",
+  "restful-api": "RESTful API",
+  "web-apis": "Web APIs",
+  "web-storage": "Web Storage"
+}

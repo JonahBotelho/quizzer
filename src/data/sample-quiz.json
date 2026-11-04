@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "question": "What is the capital city of Canada?",
+    "options": [
+      "Toronto",
+      "Vancouver",
+      "Ottawa",
+      "Montreal"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 2,
+    "question": [
+      {
+        "type": "text",
+        "text": "Consider the following JavaScript:"
+      },
+      {
+        "type": "code",
+        "code": "let total = 4;\nif (total < 5) {\n  total += 3;\n}\nconsole.log(total);"
+      },
+      {
+        "type": "text",
+        "text": "What value is printed?"
+      }
+    ],
+    "options": [
+      "4",
+      "8",
+      "7",
+      "An error because total is declared inside the if block"
+    ],
+    "answer": 3
+  }
+]
