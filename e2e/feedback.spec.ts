@@ -1,14 +1,15 @@
 /** Immediate feedback persists with selections without advancing the quiz. */
 import { currentQuestion } from './questionHelpers';
 import { test, expect } from '@playwright/test';
-import json from '../src/data/quizzes/json.json' with { type: 'json' };
+import python from '../src/data/quizzes/sample-python.json' with { type: 'json' };
 
 import type { Page } from '@playwright/test';
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
-  const jsonBankOption = page.getByRole('radio', { name: /JSON/ });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
+  const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const heading = page.locator('#question-heading');
   const feedback = page.locator('#answer-feedback');
   const questionNavigation = page.getByRole('navigation', { name: 'Your questions' });
@@ -27,10 +28,12 @@ function defineComponents(page: Page) {
   const previousButton = page.getByRole('button', { name: 'Previous', exact: true });
   const quizActions = page.locator('.quiz-actions');
   const finishButton = quizActions.getByRole('button', { name: 'Finish quiz' });
-  const scoreSummary = page.getByText('10 out of 10 correct', { exact: true });
+  const scoreSummary = page.getByText('9 out of 10 correct', { exact: true });
+  const resumeButton = page.getByRole('button', { name: 'Resume quiz', exact: true });
 
   return {
-    jsonBankOption,
+    allBanksOption,
+    pythonBankOption,
     startButton,
     heading,
     feedback,
@@ -51,20 +54,22 @@ function defineComponents(page: Page) {
     quizActions,
     finishButton,
     scoreSummary,
+    resumeButton,
   };
 }
 
-test('shows incorrect and correct feedback immediately, restores it, and scores saved selections', async ({
+test('keeps a wrong answer final through refresh and navigation and scores it as incorrect', async ({
   page,
 }, testInfo) => {
   const components = defineComponents(page);
 
   await page.goto('/');
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
   await components.startButton.click();
 
   const firstText = await components.heading.innerText();
-  const first = await currentQuestion(page, json);
+  const first = await currentQuestion(page, python);
 
   await expect(components.feedback).toBeEmpty();
   await expect(components.correctAnswerCards).toHaveCount(0);
@@ -72,8 +77,12 @@ test('shows incorrect and correct feedback immediately, restores it, and scores 
   const wrongIndex = first.answer % first.options.length;
 
   const wrongAnswerOption = components.answerOptionAt(wrongIndex);
+  const firstCorrectAnswerOption = components.answerOptionAt(first.answer - 1);
   await wrongAnswerOption.check();
   await expect(components.feedback).toContainText('Incorrect');
+  await expect(wrongAnswerOption).toBeDisabled();
+  await expect(firstCorrectAnswerOption).toBeDisabled();
+  await expect(firstCorrectAnswerOption).not.toBeChecked();
   await expect(components.firstNumber).toHaveAccessibleName(
     'Question 1: current, answered incorrectly',
   );
@@ -105,6 +114,7 @@ test('shows incorrect and correct feedback immediately, restores it, and scores 
     .poll(() => components.body.evaluate((element) => element.scrollWidth - element.clientWidth))
     .toBe(0);
   await page.reload();
+  await components.resumeButton.click();
   await expect(components.heading).toHaveText(firstText);
   await expect(components.feedback).toContainText('Incorrect');
   await expect(components.firstNumber).toHaveAccessibleName(
@@ -116,34 +126,31 @@ test('shows incorrect and correct feedback immediately, restores it, and scores 
   );
   await expect(wrongAnswerOption).toBeChecked();
 
-  const firstCorrectAnswerOption = components.answerOptionAt(first.answer - 1);
-  await firstCorrectAnswerOption.check();
-  await expect(components.feedback).toContainText('Correct!');
-  await expect(components.incorrectAnswerCards).toHaveCount(0);
-  await expect(components.firstNumber).toHaveAccessibleName(
-    'Question 1: current, answered correctly',
-  );
-  await expect(components.firstNumber).toHaveCSS(
-    'color',
-    await components.feedback.evaluate((element) => getComputedStyle(element).color),
-  );
+  await expect(wrongAnswerOption).toBeDisabled();
+  await expect(firstCorrectAnswerOption).toBeDisabled();
+  await expect(firstCorrectAnswerOption).not.toBeChecked();
+  await expect(components.incorrectAnswerCards).toHaveCount(1);
   await expect(components.firstNumber).toHaveAttribute('aria-current', 'step');
   await expect(components.heading).toHaveText(firstText);
   await page.screenshot({
-    path: testInfo.outputPath('feedback-correct-mobile-dark.png'),
+    path: testInfo.outputPath('feedback-final-mobile-dark.png'),
     fullPage: true,
   });
   await components.nextButton.click();
   await expect(components.feedback).toBeEmpty();
 
   await components.previousButton.click();
-  await expect(components.feedback).toContainText('Correct!');
+  await expect(components.feedback).toContainText('Incorrect');
+  await expect(wrongAnswerOption).toBeChecked();
+  await expect(firstCorrectAnswerOption).toBeDisabled();
+  await components.nextButton.click();
 
-  for (let i = 0; i < 10; i++) {
-    const question = await currentQuestion(page, json);
+  for (let i = 1; i < 10; i++) {
+    const question = await currentQuestion(page, python);
     const correctAnswerOption = components.answerOptionAt(question.answer - 1);
     await correctAnswerOption.check();
     await expect(components.feedback).toContainText('Correct!');
+    await expect(correctAnswerOption).toBeDisabled();
     if (i < 9) await components.nextButton.click();
   }
 

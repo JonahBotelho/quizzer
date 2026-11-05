@@ -1,13 +1,14 @@
 /** Full-browser coverage of the main journey, recovery, and responsive themes. */
 import { currentQuestion } from './questionHelpers';
 import { test, expect, type Page } from '@playwright/test';
-import json from '../src/data/quizzes/json.json' with { type: 'json' };
-import htmlAndCss from '../src/data/quizzes/html-css.json' with { type: 'json' };
+import python from '../src/data/quizzes/sample-python.json' with { type: 'json' };
+import javascript from '../src/data/quizzes/sample-javascript.json' with { type: 'json' };
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
-  const jsonBankOption = page.getByRole('radio', { name: /JSON/ });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
+  const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const questionNavigationHeading = page.getByRole('heading', { name: 'Your questions' });
   const answerOptions = page.getByRole('radio');
   const nextButton = page.getByRole('button', { name: 'Next question', exact: true });
@@ -23,8 +24,6 @@ function defineComponents(page: Page) {
   const viewResultsButton = page.getByRole('button', { name: 'View results' });
   const deleteAttemptButton = page.getByRole('button', { name: 'Delete attempt' });
   const emptyHistoryHeading = page.getByRole('heading', { name: 'No completed quizzes' });
-  const sidebarFinishButton = page.locator('.finish-sidebar');
-  const errorMessage = page.getByRole('alert');
   const questionHeading = page.locator('#question-heading');
   const firstAnswerOption = answerOptions.nth(0);
   const secondAnswerOption = answerOptions.nth(1);
@@ -40,19 +39,19 @@ function defineComponents(page: Page) {
   const perfectScorePercentage = page.getByText('100.0%', { exact: true });
   const memoryStatus = page.getByText('Not saved · this tab only', { exact: true });
   const discardButton = page.getByRole('button', { name: 'Discard', exact: true });
-  const bankSelectionHeading = page.getByRole('heading', { name: 'Choose your question bank' });
+  const bankSelectionHeading = page.getByRole('heading', { name: 'Choose your question banks' });
   const brandButton = page.getByRole('button', { name: 'quizzer', exact: true });
   const body = page.locator('body');
   const darkModeButton = page.getByRole('button', { name: 'Switch to dark mode' });
+  const saveStatus = page.locator('.save-status');
 
   return {
-    jsonBankOption,
+    allBanksOption,
+    pythonBankOption,
     startButton,
     questionNavigationHeading,
-    answerOptions,
     nextButton,
     answerOptionAt,
-    quizActions,
     finishButton,
     resultsHeading,
     scorePercentage,
@@ -63,8 +62,6 @@ function defineComponents(page: Page) {
     viewResultsButton,
     deleteAttemptButton,
     emptyHistoryHeading,
-    sidebarFinishButton,
-    errorMessage,
     questionHeading,
     firstAnswerOption,
     secondAnswerOption,
@@ -84,25 +81,27 @@ function defineComponents(page: Page) {
     brandButton,
     body,
     darkModeButton,
+    saveStatus,
   };
 }
 
-const questions = [...json, ...htmlAndCss];
+const questions = [...python, ...javascript];
 
 async function start(page: Page) {
   const components = defineComponents(page);
 
   await page.goto('/');
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
   await components.startButton.click();
 
   await expect(components.questionNavigationHeading).toBeVisible();
 }
 
-async function complete(page: Page, wrongFirst = false) {
+async function complete(page: Page, wrongFirst = false, startPosition = 0) {
   const components = defineComponents(page);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = startPosition; i < 10; i++) {
     const question = await currentQuestion(page, questions);
     const answer =
       wrongFirst && i === 0 ? question.answer % question.options.length : question.answer - 1;
@@ -139,27 +138,29 @@ test('completes, scores, reviews mistakes, and reopens history', async ({ page }
 
   await expect(components.emptyHistoryHeading).toBeVisible();
 });
-test('blocks incomplete submission, revises answers, and resumes on refresh', async ({ page }) => {
+test('keeps the first answer final and resumes on refresh', async ({ page }) => {
   const components = defineComponents(page);
 
   await start(page);
 
-  await components.sidebarFinishButton.click();
-
-  await expect(components.errorMessage).toContainText('remaining 10 questions');
-
   const question = await components.questionHeading.innerText();
 
   await components.firstAnswerOption.check();
-  await components.secondAnswerOption.check();
+  await expect(components.secondAnswerOption).toBeDisabled();
   await components.nextButton.click();
+  await expect(components.questionPosition).toBeVisible();
+  await expect(components.saveStatus).toHaveText('Saved on this browser');
   await page.reload();
 
+  await expect(components.bankSelectionHeading).toBeVisible();
+  await expect(components.questionHeading).toHaveCount(0);
+  await components.resumeButton.click();
   await expect(components.questionPosition).toBeVisible();
 
   await components.previousButton.click();
   await expect(components.questionHeading).toHaveText(question);
-  await expect(components.secondAnswerOption).toBeChecked();
+  await expect(components.firstAnswerOption).toBeChecked();
+  await expect(components.secondAnswerOption).toBeDisabled();
 
   await components.backToPracticeButton.click();
   await components.historyNavigationButton.click();
@@ -215,6 +216,9 @@ test('tabs share active progress and cannot resurrect a discarded attempt', asyn
   const otherComponents = defineComponents(other);
   await other.goto('/');
 
+  await expect(otherComponents.bankSelectionHeading).toBeVisible();
+  await expect(otherComponents.questionHeading).toHaveCount(0);
+  await otherComponents.resumeButton.click();
   await expect(otherComponents.questionHeading).toBeVisible();
 
   await components.secondAnswerOption.check();
@@ -246,21 +250,28 @@ test('responsive layouts and keyboard navigation in both themes', async ({ page 
   await page.screenshot({ path: testInfo.outputPath('mobile-light.png'), fullPage: true });
   await components.darkModeButton.click();
   await page.screenshot({ path: testInfo.outputPath('mobile-dark.png'), fullPage: true });
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
   await components.startButton.click();
 
   await expect(components.questionHeading).toBeFocused();
 
-  await components.firstAnswerOption.focus();
+  const firstQuestion = await currentQuestion(page, questions);
+  const wrongAnswerOption = components.answerOptionAt(firstQuestion.answer % firstQuestion.options.length);
+
+  await wrongAnswerOption.focus();
   await page.keyboard.press('Space');
+  await expect(wrongAnswerOption).toBeChecked();
+  await expect(wrongAnswerOption).toBeDisabled();
   await page.keyboard.press('ArrowDown');
 
-  await expect(components.secondAnswerOption).toBeChecked();
+  await expect(wrongAnswerOption).toBeChecked();
   await page.screenshot({ path: testInfo.outputPath('mobile-quiz-dark.png'), fullPage: true });
   await expect
     .poll(() => components.body.evaluate((element) => element.scrollWidth - element.clientWidth))
     .toBe(0);
-  await complete(page, true);
+  await components.nextButton.click();
+  await complete(page, false, 1);
   await page.screenshot({ path: testInfo.outputPath('mobile-results-dark.png'), fullPage: true });
   await components.historyNavigationButton.click();
   await page.screenshot({ path: testInfo.outputPath('mobile-history-dark.png'), fullPage: true });

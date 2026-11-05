@@ -1,11 +1,11 @@
-/** Classic scrollbars must not recenter the header when switching screen lengths. */
+/** Sidebar and compact navigation stay stable when document overflow changes. */
 import { test, expect } from '@playwright/test';
 
 import type { Page } from '@playwright/test';
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
-  const bankSelectionHeading = page.getByRole('heading', { name: 'Choose your question bank' });
+  const bankSelectionHeading = page.getByRole('heading', { name: 'Choose your question banks' });
   const historyCount = page.locator('.nav-count');
   const mainNavigation = page.locator('.main-nav');
   const historyNavigationButton = mainNavigation.getByRole('button', { name: /^History/ });
@@ -113,14 +113,13 @@ for (const viewport of [
       await page.evaluate(() => document.fonts.ready);
 
       const practice = await measure();
-      expect(practice.overflowing).toBe(true);
       await components.historyNavigationButton.click();
 
       const historyHeading = components.historyHeading(count ? 'History' : 'No completed quizzes');
       await expect(historyHeading).toBeVisible();
 
       const history = await measure();
-      if (count === 0 || count === 30) expect(history.overflowing).toBe(count === 30);
+      if (count === 30) expect(history.overflowing).toBe(true);
       expect(history.width).toBe(practice.width);
       expect(history.header).toEqual(practice.header);
       await components.practiceNavigationButton.click();

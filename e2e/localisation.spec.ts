@@ -6,9 +6,9 @@ import bankNames from '../src/locales/en-CA/bank-names.json' with { type: 'json'
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
   const documentRoot = page.locator('html');
-  const banks = page.getByRole('radiogroup', { name: appCopy.chooseBank });
-  const bankOptions = banks.getByRole('radio');
-  const bankOption = (name: string | RegExp) => banks.getByRole('radio', { name });
+  const banks = page.getByRole('group', { name: appCopy.chooseBank });
+  const bankOptions = banks.getByRole('checkbox');
+  const bankOption = (name: string | RegExp) => banks.getByRole('checkbox', { name });
   const startButton = page.getByRole('button', { name: appCopy.start, exact: true });
 
   return { documentRoot, banks, bankOptions, bankOption, startButton };

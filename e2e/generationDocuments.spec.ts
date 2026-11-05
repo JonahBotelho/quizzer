@@ -13,7 +13,7 @@ function defineComponents(page: Page) {
   const submit = dialog.getByRole('button', { name: 'Generate quiz', exact: true });
   const remove = (name: string) => page.getByRole('button', { name: `Remove ${name}`, exact: true });
   const alert = page.getByRole('alert');
-  const generatedBank = page.getByRole('radio', { name: /Document quiz.*Generated/ });
+  const generatedBank = page.getByRole('checkbox', { name: /Document quiz.*Generated/ });
   return { generateButton, dialog, title, description, count, password, documents, submit, remove, alert, generatedBank };
 }
 

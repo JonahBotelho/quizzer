@@ -1,5 +1,6 @@
 {
   "filesTitle": "Bring your own questions",
+  "importHelp": "About quiz JSON files",
   "filesHint": "Import a quiz, or download an example to get started.",
   "importQuiz": "Import quiz JSON",
   "importingQuiz": "Importing…",
@@ -11,7 +12,7 @@
   "importReadFailed": "Could not read {file}. Please select the file again.",
   "importFailed": "This quiz could not be imported. Please try again.",
   "importCopyName": "{name} ({count})",
-  "libraryUnavailable": "Imported quizzes cannot be saved in this browser right now. You can still import and practice in this tab, but new imports will be lost on refresh.",
+  "libraryUnavailable": "Imported quizzes cannot be saved in this browser right now. You can still import and practise in this tab, but new imports will be lost on refresh.",
   "librarySaveFailed": "This quiz is available in this tab, but could not be saved. Keep the original JSON file to import it again after refresh.",
   "libraryInvalid": "Some saved imports could not be read and were skipped. Your other quizzes are still available."
 }

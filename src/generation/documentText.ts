@@ -4,6 +4,7 @@ import { GenerationError, generationLimits } from '../core/generation';
 export async function documentText(file: File): Promise<string> {
   const extension = file.name.split('.').pop()?.toLowerCase();
   let text: string;
+
   try {
     if (extension === 'pdf') text = await pdfText(await file.arrayBuffer());
     else if (extension === 'docx') {
@@ -14,12 +15,18 @@ export async function documentText(file: File): Promise<string> {
     } else throw new GenerationError('fileType');
   } catch (error) {
     if (error instanceof GenerationError) throw error;
+
     if ((error as Error)?.name === 'PasswordException') throw new GenerationError('fileEncrypted');
+
     throw new GenerationError('fileUnreadable');
   }
+
   text = text.replace(/^\uFEFF/, '').trim();
+
   if (!text) throw new GenerationError('fileEmpty');
+
   if (text.length > generationLimits.characters) throw new GenerationError('tooLarge');
+
   return text;
 }
 
@@ -34,24 +41,38 @@ async function pdfText(data: ArrayBuffer): Promise<string> {
   const assets = import.meta.env.DEV
     ? new URL('/node_modules/pdfjs-dist/', self.location.origin)
     : new URL(/* @vite-ignore */ '../pdfjs/', import.meta.url);
-  const task = pdfjs.getDocument({ data, worker, disableFontFace: true,
-    cMapUrl: new URL('cmaps/', assets).href, standardFontDataUrl: new URL('standard_fonts/', assets).href });
+  const task = pdfjs.getDocument({
+    data,
+    worker,
+    disableFontFace: true,
+    cMapUrl: new URL('cmaps/', assets).href,
+    standardFontDataUrl: new URL('standard_fonts/', assets).href,
+  });
+
   try {
     const document = await task.promise;
     const pages: string[] = [];
     let characters = 0;
+
     for (let position = 1; position <= document.numPages; position++) {
       const page = await document.getPage(position);
       const content = await page.getTextContent();
-      const text = content.items.map(item => 'str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : '').join('');
+      const text = content.items
+        .map(item => ('str' in item ? item.str + (item.hasEOL ? '\n' : ' ') : ''))
+        .join('');
       characters += text.length + 1;
+
       if (characters > generationLimits.characters) throw new GenerationError('tooLarge');
+
       pages.push(text);
       page.cleanup();
     }
+
     return pages.join('\n');
   } finally {
-    try { await task.destroy(); } finally {
+    try {
+      await task.destroy();
+    } finally {
       worker.destroy();
       port.terminate();
     }

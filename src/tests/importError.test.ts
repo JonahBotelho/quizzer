@@ -20,9 +20,12 @@ describe('import error display', () => {
     expect(importErrorMessage(error)).toBe(t('importReadFailed', { file: 'quiz.json' }));
   });
 
-  it.each([new Error('Browser-specific failure'), new DOMException('Access denied'), 'failure', null])(
-    'replaces unexpected failures with the locale fallback %#', error => {
-      expect(importErrorMessage(error)).toBe(t('importFailed'));
-    },
-  );
+  it.each([
+    new Error('Browser-specific failure'),
+    new DOMException('Access denied'),
+    'failure',
+    null,
+  ])('replaces unexpected failures with the locale fallback %#', error => {
+    expect(importErrorMessage(error)).toBe(t('importFailed'));
+  });
 });

@@ -27,10 +27,11 @@ Keep these values server-only; never prefix them with `VITE_`. Generation is una
 
 ## Practice
 
-- Choose a question bank or **All** to mix banks, then select 10, 25, 50, or all questions. Shorter banks use every available question.
-- Questions are shuffled without repetition within an attempt. Answers show immediate feedback and can be revised while time remains.
-- Choose no time limit, a per-question timer, or a whole-quiz timer. Timers continue when navigating away, refreshing, or closing the tab; unanswered timeouts count as incorrect.
-- Resume unfinished attempts, review mistakes in History, and switch between light and dark themes.
+- Select one or more question banks, or **All** for the full library. **All** is mutually exclusive with individual banks. Then select 10, 25, 50, or all questions from the selected pool. Shorter pools use every available question.
+- Questions are shuffled without repetition within an attempt. Your first answer to each question is final, with immediate feedback. You can revisit answered questions to review them.
+- **Finish quiz** ends the attempt at any time and scores only answered questions: five correct answers out of five answered earns 100%, even in a longer quiz. Unanswered questions are excluded from the score and mistake review. Finishing without any answers saves an unscored attempt; **Practice again** keeps the original quiz length.
+- Choose no time limit, a per-question timer, or a whole-quiz timer. Timers continue when navigating away, refreshing, or closing the tab; unanswered timeouts count as incorrect. In per-question mode, you can revisit answered or expired questions to review them, with answer choices locked.
+- Opening or refreshing the app shows the practice setup. Choose **Resume quiz** to continue an unfinished attempt, or review completed attempts in History. Click anywhere on the sun and moon toggle in navigation to switch between light and dark mode; the app follows your system theme until you choose one.
 
 ## Generate a quiz
 
@@ -44,7 +45,7 @@ Generation makes one model request with no automatic retries, a 120-second deadl
 
 ## Quiz files
 
-Choose **Import quiz JSON** to add a local file or **Download sample JSON** for an editable example. Imports accept a single question object or a nonempty array, and are saved in the current browser.
+Choose **Import quiz JSON** to add a local file or **Download sample JSON** for an editable example. Expand **About quiz JSON files** below these actions for format guidance. Imports accept a single question object or a nonempty array, and are saved in the current browser.
 
 To bundle a bank with the app, add a UTF-8 JSON array to `src/data/quizzes/`:
 
@@ -79,46 +80,6 @@ Bundled filenames are stable bank identifiers. Add display names to `src/locales
 Progress, results, imports, and generated quizzes stay in the current browser profile and origin (scheme, hostname, and port). JSON imports are never uploaded; generation sends the brief and extracted reference text to the configured provider. There is no cross-device sync, quiz sharing, or results export; clearing browser storage removes saved data. Keep original quiz files and download generated quiz backups. If storage fails, the app warns you and works in memory until the tab closes or refreshes.
 
 This is a practice tool: answers are included in the browser and timers rely on the device clock. Serve it over HTTP(S); offline/PWA support is not included.
-
-## Project structure
-
-```text
-quizzer/
-├── api/                    # Vercel generation endpoint
-├── server/                 # Authentication, provider adapters, and generation prompts
-├── e2e/                    # Playwright browser tests
-│   ├── bankOrganisation.spec.ts # Bundled bank names and question counts
-│   ├── combinedBank.spec.ts # Practice across all banks
-│   ├── feedback.spec.ts     # Immediate answer feedback
-│   ├── header.spec.ts       # Header layout stability
-│   ├── import.spec.ts       # Quiz import and sample download
-│   ├── localisation.spec.ts # Locale copy and accessibility labels
-│   ├── questionContent.spec.ts # Text/code rendering and responsive layouts
-│   ├── questionHelpers.ts   # Shared question-fixture lookup
-│   ├── quizSetup.spec.ts    # Bank selection and quiz length
-│   ├── quizzer.spec.ts      # Practice, history, recovery, and themes
-│   └── timing.spec.ts       # Timer expiry and refresh recovery
-├── public/                 # Static assets
-├── src/
-│   ├── components/         # Quiz setup, practice, results, and history
-│   ├── core/               # Quiz types, validation, scoring, and timing
-│   ├── data/
-│   │   ├── quizzes/        # Bundled question banks
-│   │   └── sample-quiz.json
-│   ├── hooks/              # Theme, quiz library, and session hooks
-│   ├── generation/         # Browser requests and document extraction workers
-│   ├── locales/en-CA/      # Interface text and bank display names
-│   ├── storage/            # Browser persistence and session commands
-│   ├── tests/              # Unit and integration tests
-│   ├── App.tsx             # App shell
-│   ├── main.tsx            # Entry point
-│   └── styles.css          # Shared styles
-├── AGENTS.md               # Contributor guidance
-├── package.json            # Dependencies and npm scripts
-├── playwright.config.ts    # Browser-test configuration
-├── tsconfig.json           # TypeScript configuration
-└── vite.config.ts          # Development and build configuration
-```
 
 ## Validate
 

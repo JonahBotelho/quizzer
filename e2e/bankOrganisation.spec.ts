@@ -1,19 +1,21 @@
-/** Reorganized bank names and full question counts are usable in the practice flow. */
+/** Every bundled programming example can be selected and practised in full. */
 import { expect, test, type Page } from '@playwright/test';
-import htmlAndCss from '../src/data/quizzes/html-css.json' with { type: 'json' };
-import basics from '../src/data/quizzes/javascript-basics.json' with { type: 'json' };
-import asynchronous from '../src/data/quizzes/javascript-async.json' with { type: 'json' };
+import python from '../src/data/quizzes/sample-python.json' with { type: 'json' };
+import java from '../src/data/quizzes/sample-java.json' with { type: 'json' };
+import javascript from '../src/data/quizzes/sample-javascript.json' with { type: 'json' };
+import csharp from '../src/data/quizzes/sample-csharp.json' with { type: 'json' };
 import { currentQuestion } from './questionHelpers';
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
+  const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
   const bankOption = (name: string | RegExp) =>
-    page.getByRole('radio', {
+    page.getByRole('checkbox', {
       name,
       exact: true,
     });
   const allQuestionsOption = page.getByRole('radio', { name: 'All questions', exact: true });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const bankHeading = (name: string | RegExp) => page.getByRole('heading', { name, exact: true });
   const questionPosition = (text: string | RegExp) =>
     page.getByText(text, {
@@ -23,6 +25,7 @@ function defineComponents(page: Page) {
   const questionButtons = questionNavigation.getByRole('button');
 
   return {
+    allBanksOption,
     bankOption,
     allQuestionsOption,
     startButton,
@@ -34,16 +37,18 @@ function defineComponents(page: Page) {
 }
 
 for (const bank of [
-  { name: 'HTML and CSS', questions: htmlAndCss },
-  { name: 'JavaScript Basics', questions: basics },
-  { name: 'Asynchronous JavaScript', questions: asynchronous },
+  { name: 'Python', questions: python },
+  { name: 'Java', questions: java },
+  { name: 'JavaScript', questions: javascript },
+  { name: 'C#', questions: csharp },
 ]) {
   test(`${bank.name} starts with its complete question bank`, async ({ page }) => {
     const components = defineComponents(page);
 
     await page.goto('/');
 
-    const bankOption = components.bankOption(`${bank.name} ${bank.questions.length} questions`);
+    const bankOption = components.bankOption(`${bank.name} ${bank.questions.length} questions Sample bank`);
+    await components.allBanksOption.check();
     await bankOption.check();
 
     await components.allQuestionsOption.check();

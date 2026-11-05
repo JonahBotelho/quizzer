@@ -6,12 +6,21 @@ import { t } from '../i18n';
 import type { Bank } from '../core/types';
 
 const banks: Bank[] = [
-  { id: 'bundled', name: 'Bundled', sample: true, questions: [
-    { id: 1, question: 'Bundled question?', options: ['One', 'Two', 'Three'], answer: 3 },
-  ] },
-  { id: 'imported:demo', name: 'Imported', sample: false, imported: true, questions: [
-    { id: 1, question: 'Imported question?', options: ['First', 'Second'], answer: 2 },
-  ] },
+  {
+    id: 'bundled',
+    name: 'Bundled',
+    sample: true,
+    questions: [
+      { id: 1, question: 'Bundled question?', options: ['One', 'Two', 'Three'], answer: 3 },
+    ],
+  },
+  {
+    id: 'imported:demo',
+    name: 'Imported',
+    sample: false,
+    imported: true,
+    questions: [{ id: 1, question: 'Imported question?', options: ['First', 'Second'], answer: 2 }],
+  },
 ];
 
 describe('combined question bank', () => {
@@ -22,7 +31,9 @@ describe('combined question bank', () => {
     const combined = library.at(-1)!;
     expect(combined.id).toBe(combinedBankId);
     expect(combined.name).toBe(t('allBanks'));
-    expect(combined.questions.map(question => question.question)).toEqual(banks.flatMap(bank => bank.questions.map(question => question.question)));
+    expect(combined.questions.map(question => question.question)).toEqual(
+      banks.flatMap(bank => bank.questions.map(question => question.question)),
+    );
     expect(new Set(combined.questions.map(question => question.id)).size).toBe(2);
     combined.questions[0].options[0] = 'Edited';
     expect(banks).toEqual(original);

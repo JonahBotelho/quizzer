@@ -14,6 +14,7 @@ Keep question text under 2000 characters and each option under 1000 characters.`
 
 export function generationInput(request: GenerationRequest): string {
   const { title, description, questionCount, documents } = request;
+
   return JSON.stringify({ title, description, questionCount, documents });
 }
 

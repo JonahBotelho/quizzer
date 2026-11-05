@@ -1,21 +1,30 @@
-/** Reorganizing banks must retain the original JavaScript question identities exactly once. */
+/** Bundled programming examples provide complete, usable 20-question banks. */
 import { describe, expect, it } from 'vitest';
 import { catalog } from '../catalog';
+import { createAttempt, isAttempt, score } from '../core/quiz';
 
-const basics = catalog.banks.find(bank => bank.id === 'javascript-basics')!;
-const asynchronous = catalog.banks.find(bank => bank.id === 'javascript-async')!;
+const examples = [
+  { id: 'sample-python', name: 'Python' },
+  { id: 'sample-java', name: 'Java' },
+  { id: 'sample-javascript', name: 'JavaScript' },
+  { id: 'sample-csharp', name: 'C#' },
+];
 
-describe('JavaScript bank organization', () => {
-  it('retains all 90 original question IDs across the two banks without overlap', () => {
-    const ids = [...basics.questions, ...asynchronous.questions].map(question => question.id);
-    expect(ids.sort((left, right) => left - right)).toEqual(Array.from({ length: 90 }, (_, index) => index + 1));
-  });
+describe('bundled programming examples', () => {
+  it.each(examples)(
+    '$name has 20 questions and supports a complete saved attempt',
+    ({ id, name }) => {
+      const bank = catalog.banks.find(bank => bank.id === id)!;
 
-  it('places timer and event-loop questions with Promises while keeping synchronous function examples in Basics', () => {
-    const asyncIds = asynchronous.questions.map(question => question.id);
-    const basicIds = basics.questions.map(question => question.id);
-    expect(asyncIds).toEqual(expect.arrayContaining([45, 46, 47, 59, 60, 63, 76, 87, 90]));
-    expect(basicIds).toEqual(expect.arrayContaining([39, 52, 53, 56, 57, 58, 61]));
-    expect(asyncIds.some(id => basicIds.includes(id))).toBe(false);
-  });
+      expect(bank).toMatchObject({ name, sample: true });
+      expect(bank.questions).toHaveLength(20);
+      expect(new Set(bank.questions.map(question => question.id)).size).toBe(20);
+
+      const attempt = createAttempt(bank, 20);
+      attempt.answers = attempt.questions.map(question => question.answer);
+
+      expect(score(attempt)).toEqual({ correct: 20, total: 20, ratio: 1 });
+      expect(isAttempt(JSON.parse(JSON.stringify(attempt)))).toBe(true);
+    },
+  );
 });

@@ -4,15 +4,15 @@ import { expect, test, type Page } from '@playwright/test';
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
-  const banks = page.getByRole('radiogroup', { name: 'Choose your question bank' });
-  const combinedBankOption = banks.getByRole('radio', {
+  const banks = page.getByRole('group', { name: 'Choose your question banks' });
+  const combinedBankOption = banks.getByRole('checkbox', {
     name: `All ${bundledCount} questions`,
     exact: true,
   });
   const allQuestionsOption = page.getByRole('radio', { name: 'All questions', exact: true });
   const wholeQuizOption = page.getByRole('radio', { name: 'Whole quiz', exact: true });
   const durationInput = page.getByRole('spinbutton', { name: 'Minutes for the whole quiz' });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const combinedQuizHeading = page.getByRole('heading', { name: 'All', exact: true });
   const questionPosition = page.getByText(`Question 1 of ${bundledCount}`, { exact: true });
   const questionNavigation = page.getByRole('navigation', { name: 'Your questions' });
@@ -24,12 +24,15 @@ function defineComponents(page: Page) {
   const practiceAgainButton = page.getByRole('button', { name: 'Practice again', exact: true });
   const importButton = page.getByRole('button', { name: 'Import quiz JSON', exact: true });
   const quizImportInput = page.locator('#quiz-import');
-  const combinedBankWithImportOption = banks.getByRole('radio', {
+  const combinedBankWithImportOption = banks.getByRole('checkbox', {
     name: `All ${bundledCount + 1} questions`,
     exact: true,
   });
   const twentyFiveQuestionsOption = page.getByRole('radio', { name: '25 questions', exact: true });
   const fixedLengthQuestionPosition = page.getByText('Question 1 of 25', { exact: true });
+  const feedback = page.locator('.answer-feedback');
+  const saveStatus = page.locator('.save-status');
+  const resumeButton = page.getByRole('button', { name: 'Resume quiz', exact: true });
 
   return {
     banks,
@@ -52,6 +55,9 @@ function defineComponents(page: Page) {
     combinedBankWithImportOption,
     twentyFiveQuestionsOption,
     fixedLengthQuestionPosition,
+    feedback,
+    saveStatus,
+    resumeButton,
   };
 }
 
@@ -83,7 +89,11 @@ test('all banks and all questions survive refresh, timed completion, and repeat'
   const firstQuestion = await components.questionHeading.innerText();
 
   await components.firstAnswerOption.check();
+  await expect(components.feedback).not.toBeEmpty();
+  await expect(components.saveStatus).toHaveText('Saved on this browser');
   await page.reload();
+  await expect(components.banks).toBeVisible();
+  await components.resumeButton.click();
   await expect(components.questionHeading).toHaveText(firstQuestion);
   await expect(components.firstAnswerOption).toBeChecked();
   await page.clock.fastForward(61_000);

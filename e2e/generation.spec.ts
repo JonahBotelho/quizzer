@@ -13,7 +13,7 @@ function defineComponents(page: Page) {
   const submit = dialog.getByRole('button', { name: 'Generate quiz', exact: true });
   const cancel = dialog.getByRole('button', { name: 'Cancel', exact: true });
   const alert = page.getByRole('alert');
-  const generatedBank = (name = 'My generated quiz') => page.getByRole('radio', { name: new RegExp(`${name}.*Generated`) });
+  const generatedBank = (name = 'My generated quiz') => page.getByRole('checkbox', { name: new RegExp(`${name}.*Generated`) });
   const allQuestions = page.getByRole('radio', { name: 'All questions', exact: true });
   const download = page.getByRole('link', { name: 'Download quiz JSON', exact: true });
   const importInput = page.locator('#quiz-import');
@@ -24,7 +24,7 @@ function defineComponents(page: Page) {
   const fileToolbar = page.locator('.file-toolbar');
   const fileActions = page.locator('.file-actions');
   const downloadSample = page.getByRole('link', { name: 'Download sample JSON', exact: true });
-  const start = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const start = page.getByRole('button', { name: 'Start practising', exact: true });
   const questionHeading = page.locator('#question-heading');
   const answerOptions = page.getByRole('radio');
   const firstAnswer = answerOptions.first();

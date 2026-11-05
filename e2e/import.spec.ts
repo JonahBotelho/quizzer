@@ -5,14 +5,15 @@ import importCopy from '../src/locales/en-CA/import.json' with { type: 'json' };
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
+  const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
   const importButton = page.getByRole('button', { name: 'Import quiz JSON', exact: true });
   const quizImportInput = page.locator('#quiz-import');
   const importSuccessMessage = page.getByText('Imported My Import with 2 questions.', {
     exact: true,
   });
-  const importedBankOption = page.getByRole('radio', { name: /My Import 2 questions Imported/ });
+  const importedBankOption = page.getByRole('checkbox', { name: /My Import 2 questions Imported/ });
   const fiftyQuestionsOption = page.getByRole('radio', { name: '50 questions', exact: true });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const questionHeading = page.locator('#question-heading');
   const answerOptions = page.getByRole('radio');
   const nextButton = page.getByRole('button', { name: 'Next question', exact: true });
@@ -25,29 +26,30 @@ function defineComponents(page: Page) {
   const viewResultsButton = page.getByRole('button', { name: 'View results' });
   const questionPosition = page.getByText('Question 1 of 2', { exact: true });
   const downloadSampleLink = page.getByRole('link', { name: 'Download sample JSON' });
-  const sampleBankOption = page.getByRole('radio', { name: /Quizzer Sample 2 questions Imported/ });
+  const sampleBankOption = page.getByRole('checkbox', { name: /Quizzer Sample 2 questions Imported/ });
   const codeBlocks = page.locator('.question-code');
   const codeContent = page.locator('.question-code code');
   const questionParagraphs = page.locator('#question-content p');
   const lastQuestionParagraph = questionParagraphs.last();
-  const banks = page.getByRole('radiogroup', { name: 'Choose your question bank' });
-  const bankOptions = banks.getByRole('radio');
+  const banks = page.getByRole('group', { name: 'Choose your question banks' });
+  const bankOptions = banks.getByRole('checkbox');
   const errorMessage = page.getByRole('alert');
-  const correctedBankOption = page.getByRole('radio', {
+  const correctedBankOption = page.getByRole('checkbox', {
     name: /^Broken\s*1 questions\s*Imported$/,
   });
-  const duplicateImportedBankOption = page.getByRole('radio', {
+  const duplicateImportedBankOption = page.getByRole('checkbox', {
     name: /My Import \(2\) 2 questions Imported/,
   });
   const importStorageNotice = page.getByText(/Imported quizzes cannot be saved/);
   const darkModeButton = page.getByRole('button', { name: 'Switch to dark mode' });
   const body = page.locator('body');
-  const jsonBankOption = page.getByRole('radio', { name: /JSON/ });
+  const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
   const firstAnswerOption = answerOptions.first();
   const backToPracticeButton = page.getByRole('button', { name: 'Back to practice' });
   const resumeButton = page.getByRole('button', { name: 'Resume quiz' });
 
   return {
+    allBanksOption,
     importButton,
     quizImportInput,
     importSuccessMessage,
@@ -79,7 +81,7 @@ function defineComponents(page: Page) {
     importStorageNotice,
     darkModeButton,
     body,
-    jsonBankOption,
+    pythonBankOption,
     firstAnswerOption,
     backToPracticeButton,
     resumeButton,
@@ -167,6 +169,7 @@ test('downloaded JSON is readable and can be imported without changes', async ({
 
   await components.startButton.click();
 
+  await expect(components.questionHeading).toBeFocused();
   if ((await components.codeBlocks.count()) === 0) await components.nextButton.click();
   await expect(components.codeBlocks).toHaveCount(1);
   expect(await components.codeContent.textContent()).toBe(sample[1].question[1].code);
@@ -276,7 +279,8 @@ test('importing preserves an unfinished attempt until the user replaces it', asy
   const components = defineComponents(page);
 
   await page.goto('/');
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
   await components.startButton.click();
 
   const question = await components.questionHeading.innerText();

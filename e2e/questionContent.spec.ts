@@ -5,8 +5,8 @@ import { test, expect, type Page } from '@playwright/test';
 function defineComponents(page: Page) {
   const importButton = page.getByRole('button', { name: 'Import quiz JSON', exact: true });
   const quizImportInput = page.locator('#quiz-import');
-  const codeBankOption = page.getByRole('radio', { name: /Code 1 questions Imported/ });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const codeBankOption = page.getByRole('checkbox', { name: /Code 1 questions Imported/ });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const questionHeading = page.locator('#question-heading');
   const questionBlocks = page.locator('#question-content > *');
   const executableMarkup = page.locator('#question-content img, #question-content script');
@@ -27,6 +27,9 @@ function defineComponents(page: Page) {
   const body = page.locator('body');
   const code = codeBlocks.last();
   const firstCodeBlock = codeBlocks.first();
+  const feedback = page.locator('.answer-feedback');
+  const saveStatus = page.locator('.save-status');
+  const resumeButton = page.getByRole('button', { name: 'Resume quiz', exact: true });
 
   return {
     importButton,
@@ -53,6 +56,9 @@ function defineComponents(page: Page) {
     body,
     code,
     firstCodeBlock,
+    feedback,
+    saveStatus,
+    resumeButton,
   };
 }
 
@@ -108,8 +114,11 @@ test('mixed content is literal, ordered, resumable, and visible in saved reviews
   );
 
   await components.firstAnswerOption.check();
+  await expect(components.feedback).toContainText('Incorrect');
+  await expect(components.saveStatus).toHaveText('Saved on this browser');
   await page.reload();
 
+  await components.resumeButton.click();
   await expect(components.codeBlocks).toHaveCount(2);
   expect(await components.firstCodeContent.textContent()).toBe(firstCode);
   await expect(components.firstAnswerOption).toBeChecked();

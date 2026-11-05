@@ -1,0 +1,56 @@
+/* Local quiz toolbar, expandable format help, and backup actions. */
+.quiz-files {
+  min-width: 0;
+  padding-top: 6px;
+}
+.file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+.file-actions > .button, .file-actions > .generation-entry {
+  flex: 1 1 120px;
+}
+.file-actions > .button, .file-actions > .generation-entry > .button {
+  width: 100%;
+  min-height: 72px;
+}
+.file-format-help {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.file-format-help summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: list-item;
+  align-content: center;
+}
+.file-format-hint {
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.generation-success {
+  margin-bottom: 24px;
+}
+.generated-download {
+  margin-top: 16px;
+}
+@media (max-width: 1199px) {
+  .file-actions > .button, .file-actions > .generation-entry {
+    flex: 0 1 auto;
+  }
+  .file-actions > .button, .file-actions > .generation-entry > .button {
+    min-height: 48px;
+  }
+}
+@media (max-width: 767px) {
+  .file-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .file-actions > .generation-entry {
+    width: 100%;
+  }
+}

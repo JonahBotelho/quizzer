@@ -1,5 +1,5 @@
 {
-  "storageUnavailable": "Browser storage is unavailable. You can still practice, but progress and results will be lost when this tab closes or reloads.",
+  "storageUnavailable": "Browser storage is unavailable. You can still practise, but progress and results will be lost when this tab closes or reloads.",
   "storageFailed": "Your latest changes could not be saved. You can continue in this tab, but changes will be lost on reload. Existing saved history has been kept.",
   "invalidRecords": "Some saved records could not be read and have been skipped. Other saved attempts are still available.",
   "storageConflict": "This attempt changed in another tab. The latest saved state has been loaded.", "externalChange": "Your saved progress was updated in another tab."

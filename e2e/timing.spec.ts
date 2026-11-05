@@ -1,12 +1,13 @@
 /** Timed-mode journeys use the browser clock rather than real-time sleeps. */
 import { currentQuestion } from './questionHelpers';
 import { test, expect, type Page } from '@playwright/test';
-import json from '../src/data/quizzes/json.json' with { type: 'json' };
+import python from '../src/data/quizzes/sample-python.json' with { type: 'json' };
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
-  const jsonBankOption = page.getByRole('radio', { name: /JSON/ });
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
+  const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
+  const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
   const questionHeading = page.locator('#question-heading');
   const untimedOption = page.getByRole('radio', { name: 'No time limit', exact: true });
   const wholeQuizOption = page.getByRole('radio', { name: 'Whole quiz', exact: true });
@@ -40,9 +41,17 @@ function defineComponents(page: Page) {
   const historyNavigationButton = page.getByRole('button', { name: /^History/ });
   const viewResultsButton = page.getByRole('button', { name: 'View results' });
   const zeroCorrectSummary = page.getByText('0 out of 10 correct', { exact: true });
+  const resumeButton = page.getByRole('button', { name: 'Resume quiz', exact: true });
+  const previousButton = page.getByRole('button', { name: 'Previous', exact: true });
+  const nextButton = page.getByRole('button', { name: 'Next question', exact: true });
+  const lockedAnswerHint = page.getByText('Time’s up for this question. Its answer is locked.', {
+    exact: true,
+  });
+  const disabledAnswerOptions = page.locator('.answers input:disabled');
 
   return {
-    jsonBankOption,
+    allBanksOption,
+    pythonBankOption,
     startButton,
     questionHeading,
     untimedOption,
@@ -71,6 +80,11 @@ function defineComponents(page: Page) {
     historyNavigationButton,
     viewResultsButton,
     zeroCorrectSummary,
+    resumeButton,
+    previousButton,
+    nextButton,
+    lockedAnswerHint,
+    disabledAnswerOptions,
   };
 }
 
@@ -81,7 +95,8 @@ async function setup(page: Page) {
   await page.clock.install({ time });
   await page.clock.pauseAt(new Date(time.getTime() + 1000));
   await page.goto('/');
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
 }
 
 async function start(page: Page) {
@@ -126,7 +141,7 @@ test('whole-quiz expiry submits unanswered questions as incorrect and survives r
   await components.quizDurationInput.fill('1');
   await start(page);
 
-  const current = await currentQuestion(page, json);
+  const current = await currentQuestion(page, python);
 
   const correctAnswerOption = components.answerOptionAt(current.answer - 1);
   await correctAnswerOption.check();
@@ -136,6 +151,7 @@ test('whole-quiz expiry submits unanswered questions as incorrect and survives r
 
   await expect(components.countdown).toHaveText('00:30');
   await page.reload();
+  await components.resumeButton.click();
   await expect(components.countdown).toHaveText('00:30');
   await page.clock.fastForward(30001);
 
@@ -146,7 +162,7 @@ test('whole-quiz expiry submits unanswered questions as incorrect and survives r
   await components.practiceAgainButton.click();
   await expect(components.countdown).toHaveText('01:00');
 });
-test('per-question expiry advances, locks expired questions, and reviews timeouts', async ({
+test('per-question expiry keeps answered and expired questions available for locked review', async ({
   page,
 }, testInfo) => {
   const components = defineComponents(page);
@@ -163,7 +179,7 @@ test('per-question expiry advances, locks expired questions, and reviews timeout
   });
   await start(page);
 
-  const current = await currentQuestion(page, json);
+  const current = await currentQuestion(page, python);
 
   const correctAnswerOption = components.answerOptionAt(current.answer - 1);
   await correctAnswerOption.check();
@@ -175,14 +191,39 @@ test('per-question expiry advances, locks expired questions, and reviews timeout
   await page.clock.fastForward(2000);
 
   await expect(components.thirdQuestionPosition).toBeVisible();
-  await expect(components.timedOutQuestionButton).toBeDisabled();
+  await expect(components.timedOutQuestionButton).toBeEnabled();
   await expect(components.correctQuestionButton).toHaveClass(/correct/);
+  await expect(components.correctQuestionButton).toBeEnabled();
+
+  await components.timedOutQuestionButton.click();
+  await expect(components.secondQuestionPosition).toBeVisible();
+  await expect(components.lockedAnswerHint).toBeVisible();
+  await expect(components.disabledAnswerOptions).toHaveCount(4);
+  await page.clock.fastForward(250);
+  await expect(components.secondQuestionPosition).toBeVisible();
+
   await page.reload();
+  await components.resumeButton.click();
+  await expect(components.secondQuestionPosition).toBeVisible();
+  await expect(components.disabledAnswerOptions).toHaveCount(4);
+
+  await components.previousButton.click();
+  await expect(components.questionPosition).toBeVisible();
+  await expect(correctAnswerOption).toBeChecked();
+  await expect(components.disabledAnswerOptions).toHaveCount(4);
+  await expect(components.answerFeedback).toContainText('Correct!');
+
+  await components.nextButton.click();
+  await expect(components.secondQuestionPosition).toBeVisible();
+  await expect(components.disabledAnswerOptions).toHaveCount(4);
+  await components.nextButton.click();
   await expect(components.thirdQuestionPosition).toBeVisible();
+  await expect(components.firstAnswerOption).toBeEnabled();
+  await expect(components.countdown).toHaveText('00:02');
   await page.screenshot({ path: testInfo.outputPath('timing-quiz-mobile.png'), fullPage: true });
 
   await expect
-    .poll(() => components.body.evaluate((element) => element.scrollWidth - element.clientWidth))
+    .poll(() => components.body.evaluate(element => element.scrollWidth - element.clientWidth))
     .toBe(0);
   await page.clock.fastForward(16001);
 

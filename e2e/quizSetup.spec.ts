@@ -1,29 +1,30 @@
 /** Quiz-length choices and bank selection remain consistent across setup changes. */
 import { expect, test, type Page } from '@playwright/test';
-import json from '../src/data/quizzes/json.json' with { type: 'json' };
-import htmlAndCss from '../src/data/quizzes/html-css.json' with { type: 'json' };
+import python from '../src/data/quizzes/sample-python.json' with { type: 'json' };
+import javascript from '../src/data/quizzes/sample-javascript.json' with { type: 'json' };
 import appCopy from '../src/locales/en-CA/app.json' with { type: 'json' };
 import { currentQuestion } from './questionHelpers';
 
 // Locators are lazy; bind them to each test's page without sharing browser state.
 function defineComponents(page: Page) {
+  const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
   const counts = page.getByRole('radiogroup', { name: appCopy.chooseLength });
   const lengthOptions = counts.getByRole('radio');
   const lengthOption = (name: string) => counts.getByRole('radio', { name, exact: true });
   const fiftyQuestionsOption = counts.getByRole('radio', { name: '50 questions', exact: true });
-  const htmlBankOption = page.getByRole('radio', { name: /HTML/ });
-  const htmlSessionSummary = page.getByText(`${htmlAndCss.length} questions · No time limit`, {
+  const javascriptBankOption = page.getByRole('checkbox', { name: /JavaScript/ });
+  const javascriptSessionSummary = page.getByText(`${javascript.length} questions · No time limit`, {
     exact: true,
   });
-  const jsonBankOption = page.getByRole('radio', { name: /JSON/ });
-  const jsonSessionSummary = page.getByText(`${json.length} questions · No time limit`, {
+  const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
+  const pythonSessionSummary = page.getByText(`${python.length} questions · No time limit`, {
     exact: true,
   });
   const allQuestionsOption = counts.getByRole('radio', { name: 'All questions', exact: true });
   const darkModeButton = page.getByRole('button', { name: 'Switch to dark mode' });
   const documentRoot = page.locator('html');
-  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
-  const htmlQuestionPosition = page.getByText(`Question 1 of ${htmlAndCss.length}`, {
+  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const javascriptQuestionPosition = page.getByText(`Question 1 of ${javascript.length}`, {
     exact: true,
   });
   const nextButton = page.getByRole('button', { name: 'Next question' });
@@ -31,27 +32,28 @@ function defineComponents(page: Page) {
     page.getByText(text, {
       exact: true,
     });
-  const jsonQuestionPosition = page.getByText(`Question 1 of ${json.length}`, { exact: true });
+  const pythonQuestionPosition = page.getByText(`Question 1 of ${python.length}`, { exact: true });
   const questionNavigation = page.getByRole('navigation', { name: 'Your questions' });
   const questionButtons = questionNavigation.getByRole('button');
 
   return {
+    allBanksOption,
     counts,
     lengthOptions,
     lengthOption,
     fiftyQuestionsOption,
-    htmlBankOption,
-    htmlSessionSummary,
-    jsonBankOption,
-    jsonSessionSummary,
+    javascriptBankOption,
+    javascriptSessionSummary,
+    pythonBankOption,
+    pythonSessionSummary,
     allQuestionsOption,
     darkModeButton,
     documentRoot,
     startButton,
-    htmlQuestionPosition,
+    javascriptQuestionPosition,
     nextButton,
     markupAnswer,
-    jsonQuestionPosition,
+    pythonQuestionPosition,
     questionNavigation,
     questionButtons,
   };
@@ -72,16 +74,19 @@ test('fixed lengths stay enabled and preserve selection across question banks', 
   }
 
   await components.fiftyQuestionsOption.check();
-  await components.htmlBankOption.check();
+  await components.allBanksOption.check();
+  await components.javascriptBankOption.check();
   await expect(components.fiftyQuestionsOption).toBeChecked();
-  await expect(components.htmlSessionSummary).toBeVisible();
+  await expect(components.javascriptSessionSummary).toBeVisible();
 
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
   await expect(components.fiftyQuestionsOption).toBeChecked();
-  await expect(components.jsonSessionSummary).toBeVisible();
+  await expect(components.pythonSessionSummary).toBeVisible();
 
   await components.allQuestionsOption.check();
-  await components.htmlBankOption.check();
+  await components.allBanksOption.check();
+  await components.javascriptBankOption.check();
   await expect(components.allQuestionsOption).toBeChecked();
   await expect(components.lengthOptions).toHaveCount(4);
 
@@ -89,22 +94,23 @@ test('fixed lengths stay enabled and preserve selection across question banks', 
   await page.reload();
 
   await expect(components.documentRoot).toHaveAttribute('data-theme', 'dark');
-  await components.htmlBankOption.check();
+  await components.allBanksOption.check();
+  await components.javascriptBankOption.check();
   await components.fiftyQuestionsOption.check();
   await components.startButton.click();
 
-  await expect(components.htmlQuestionPosition).toBeVisible();
+  await expect(components.javascriptQuestionPosition).toBeVisible();
 
-  const markupQuestion = htmlAndCss.find((question) =>
+  const markupQuestion = javascript.find((question) =>
     question.options.some((option) => option.startsWith('<h1>')),
   )!;
 
-  for (let i = 0; i < htmlAndCss.length; i++) {
-    if ((await currentQuestion(page, htmlAndCss)).id === markupQuestion.id) break;
-    if (i < htmlAndCss.length - 1) await components.nextButton.click();
+  for (let i = 0; i < javascript.length; i++) {
+    if ((await currentQuestion(page, javascript)).id === markupQuestion.id) break;
+    if (i < javascript.length - 1) await components.nextButton.click();
   }
 
-  expect((await currentQuestion(page, htmlAndCss)).id).toBe(markupQuestion.id);
+  expect((await currentQuestion(page, javascript)).id).toBe(markupQuestion.id);
 
   const markupAnswer = components.markupAnswer(markupQuestion.options[markupQuestion.answer - 1]);
   await expect(markupAnswer).toBeVisible();
@@ -114,10 +120,11 @@ test('all questions starts a quiz using the full selected bank', async ({ page }
   const components = defineComponents(page);
 
   await page.goto('/');
-  await components.jsonBankOption.check();
+  await components.allBanksOption.check();
+  await components.pythonBankOption.check();
   await components.allQuestionsOption.check();
   await components.startButton.click();
 
-  await expect(components.jsonQuestionPosition).toBeVisible();
-  await expect(components.questionButtons).toHaveCount(json.length);
+  await expect(components.pythonQuestionPosition).toBeVisible();
+  await expect(components.questionButtons).toHaveCount(python.length);
 });
