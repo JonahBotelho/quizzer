@@ -13,7 +13,9 @@ npm run dev
 
 Open the URL printed by Vite (normally http://127.0.0.1:5173).
 
-For generation, copy `.env.example` to `.env.local`, fill in the server-only configuration below, and run `npm run dev:full`. This uses the Vercel CLI (installed through npx when needed); its initial setup may ask you to sign in and link a project. The frontend-only dev and preview servers leave generation unavailable.
+For generation, copy `.env.example` to `.env.local` (or use `.env`), fill in the server-only configuration below, and run `npm run dev`. The development server serves the generation API locally. Restart it after changing configuration, then refresh the page. The preview server leaves generation unavailable.
+
+To check the Vercel runtime locally, use `npm run dev:full`. This uses the Vercel CLI (installed through npx when needed); its initial setup may ask you to sign in and link a project.
 
 | Environment variable | Value |
 | --- | --- |
@@ -94,7 +96,7 @@ npm audit
 
 Unit/integration tests live in `src/tests/`; browser tests live in `e2e/`. Playwright builds the app and starts its own preview server on port 4174, which must be free.
 
-Generation tests mock model calls and need no keys. Document browser tests exercise the bundled PDF and DOCX workers. To smoke-test a real provider, configure its environment variables, run `npm run dev:full`, and generate a small quiz with a reference file. Repeat with the other provider when validating both integrations; live requests use your API budget.
+Generation tests mock model calls and need no keys. Document browser tests exercise the bundled PDF and DOCX workers. To smoke-test a real provider, configure its environment variables, run `npm run dev`, and generate a small quiz with a reference file. Repeat with the other provider when validating both integrations; live requests use your API budget.
 
 ## Deploy
 
