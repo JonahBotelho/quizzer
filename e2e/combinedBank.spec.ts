@@ -12,7 +12,7 @@ function defineComponents(page: Page) {
   const allQuestionsOption = page.getByRole('radio', { name: 'All questions', exact: true });
   const wholeQuizOption = page.getByRole('radio', { name: 'Whole quiz', exact: true });
   const durationInput = page.getByRole('spinbutton', { name: 'Minutes for the whole quiz' });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const combinedQuizHeading = page.getByRole('heading', { name: 'All', exact: true });
   const questionPosition = page.getByText(`Question 1 of ${bundledCount}`, { exact: true });
   const questionNavigation = page.getByRole('navigation', { name: 'Your questions' });

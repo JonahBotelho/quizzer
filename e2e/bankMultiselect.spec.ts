@@ -12,7 +12,7 @@ function defineComponents(page: Page) {
   const checkedBanks = banks.getByRole('checkbox', { checked: true });
   const session = page.getByRole('region', { name: 'Your session' });
   const summary = session.locator('.session-summary');
-  const start = session.getByRole('button', { name: 'Start practising', exact: true });
+  const start = session.getByRole('button', { name: 'Start practicing', exact: true });
   const allQuestions = session.getByRole('radio', { name: 'All questions', exact: true });
   const wholeQuiz = session.getByRole('radio', { name: 'Whole quiz', exact: true });
   const minutes = session.getByRole('spinbutton', { name: 'Minutes for the whole quiz' });

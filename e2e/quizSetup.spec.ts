@@ -23,7 +23,7 @@ function defineComponents(page: Page) {
   const allQuestionsOption = counts.getByRole('radio', { name: 'All questions', exact: true });
   const darkModeButton = page.getByRole('button', { name: 'Switch to dark mode' });
   const documentRoot = page.locator('html');
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const javascriptQuestionPosition = page.getByText(`Question 1 of ${javascript.length}`, {
     exact: true,
   });

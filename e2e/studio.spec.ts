@@ -19,7 +19,7 @@ function defineComponents(page: Page) {
   const perQuestion = session.getByRole('radio', { name: 'Per question', exact: true });
   const duration = session.getByLabel('Seconds per question', { exact: true });
   const timeError = session.getByRole('alert');
-  const start = session.getByRole('button', { name: 'Start practising', exact: true });
+  const start = session.getByRole('button', { name: 'Start practicing', exact: true });
   const importInput = page.locator('#quiz-import');
   const fileActions = page.locator('.file-actions');
   const toolbarActions = fileActions.locator('button, a');

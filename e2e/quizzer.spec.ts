@@ -8,7 +8,7 @@ import javascript from '../src/data/quizzes/sample-javascript.json' with { type:
 function defineComponents(page: Page) {
   const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
   const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const questionNavigationHeading = page.getByRole('heading', { name: 'Your questions' });
   const answerOptions = page.getByRole('radio');
   const nextButton = page.getByRole('button', { name: 'Next question', exact: true });

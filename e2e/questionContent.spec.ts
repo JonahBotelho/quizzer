@@ -6,7 +6,7 @@ function defineComponents(page: Page) {
   const importButton = page.getByRole('button', { name: 'Import quiz JSON', exact: true });
   const quizImportInput = page.locator('#quiz-import');
   const codeBankOption = page.getByRole('checkbox', { name: /Code 1 questions Imported/ });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const questionHeading = page.locator('#question-heading');
   const questionBlocks = page.locator('#question-content > *');
   const executableMarkup = page.locator('#question-content img, #question-content script');

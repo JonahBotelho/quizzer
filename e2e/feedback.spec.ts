@@ -9,7 +9,7 @@ import type { Page } from '@playwright/test';
 function defineComponents(page: Page) {
   const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
   const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const heading = page.locator('#question-heading');
   const feedback = page.locator('#answer-feedback');
   const questionNavigation = page.getByRole('navigation', { name: 'Your questions' });

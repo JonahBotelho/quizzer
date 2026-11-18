@@ -7,7 +7,7 @@ import python from '../src/data/quizzes/sample-python.json' with { type: 'json' 
 function defineComponents(page: Page) {
   const allBanksOption = page.getByRole('checkbox', { name: /^All [\d,]+ questions$/ });
   const pythonBankOption = page.getByRole('checkbox', { name: /Python/ });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const questionHeading = page.locator('#question-heading');
   const untimedOption = page.getByRole('radio', { name: 'No time limit', exact: true });
   const wholeQuizOption = page.getByRole('radio', { name: 'Whole quiz', exact: true });

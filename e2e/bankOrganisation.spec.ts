@@ -1,4 +1,4 @@
-/** Every bundled programming example can be selected and practised in full. */
+/** Every bundled programming example can be selected and practiced in full. */
 import { expect, test, type Page } from '@playwright/test';
 import python from '../src/data/quizzes/sample-python.json' with { type: 'json' };
 import java from '../src/data/quizzes/sample-java.json' with { type: 'json' };
@@ -15,7 +15,7 @@ function defineComponents(page: Page) {
       exact: true,
     });
   const allQuestionsOption = page.getByRole('radio', { name: 'All questions', exact: true });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const bankHeading = (name: string | RegExp) => page.getByRole('heading', { name, exact: true });
   const questionPosition = (text: string | RegExp) =>
     page.getByText(text, {

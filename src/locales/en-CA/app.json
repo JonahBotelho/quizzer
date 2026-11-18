@@ -19,7 +19,7 @@
   "allQuestions": "All {count} questions",
   "unavailable": "Not enough questions",
   "sample": "Sample bank",
-  "start": "Start practising",
+  "start": "Start practicing",
   "startMeta": "{count} questions · No time limit",
   "emptyTitle": "Your first quiz starts here",
   "emptyBody": "Import a JSON quiz above, or download the sample to create your first question bank.",
@@ -44,7 +44,7 @@
   "completedOn": "Completed {date}",
   "summarySessions": "Sessions completed",
   "summaryAverage": "Average score",
-  "summaryAnswered": "Questions practised",
+  "summaryAnswered": "Questions practiced",
   "allQuestionsChoice": "All questions",
   "allChoiceTitle": "All",
   "questionUnit": "questions"

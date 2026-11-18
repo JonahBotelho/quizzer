@@ -4,7 +4,7 @@ import { expect, test, type Page } from '@playwright/test';
 function defineComponents(page: Page) {
   const importInput = page.locator('#quiz-import');
   const importedBank = page.getByRole('checkbox', { name: 'Partial Practice 10 questions Imported', exact: true });
-  const start = page.getByRole('button', { name: 'Start practising', exact: true });
+  const start = page.getByRole('button', { name: 'Start practicing', exact: true });
   const answers = page.getByRole('radio');
   const correctAnswer = answers.nth(1);
   const wrongAnswer = answers.nth(0);

@@ -24,7 +24,7 @@ function defineComponents(page: Page) {
   const fileToolbar = page.locator('.file-toolbar');
   const fileActions = page.locator('.file-actions');
   const downloadSample = page.getByRole('link', { name: 'Download sample JSON', exact: true });
-  const start = page.getByRole('button', { name: 'Start practising', exact: true });
+  const start = page.getByRole('button', { name: 'Start practicing', exact: true });
   const questionHeading = page.locator('#question-heading');
   const answerOptions = page.getByRole('radio');
   const firstAnswer = answerOptions.first();

@@ -13,7 +13,7 @@ function defineComponents(page: Page) {
   });
   const importedBankOption = page.getByRole('checkbox', { name: /My Import 2 questions Imported/ });
   const fiftyQuestionsOption = page.getByRole('radio', { name: '50 questions', exact: true });
-  const startButton = page.getByRole('button', { name: 'Start practising', exact: true });
+  const startButton = page.getByRole('button', { name: 'Start practicing', exact: true });
   const questionHeading = page.locator('#question-heading');
   const answerOptions = page.getByRole('radio');
   const nextButton = page.getByRole('button', { name: 'Next question', exact: true });
