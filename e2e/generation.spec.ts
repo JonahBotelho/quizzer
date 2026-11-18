@@ -14,8 +14,12 @@ function defineComponents(page: Page) {
   const cancel = dialog.getByRole('button', { name: 'Cancel', exact: true });
   const alert = page.getByRole('alert');
   const generatedBank = (name = 'My generated quiz') => page.getByRole('checkbox', { name: new RegExp(`${name}.*Generated`) });
+  const removeGeneratedBank = page.getByRole('button', { name: 'Remove My generated quiz', exact: true });
+  const removalDialog = page.getByRole('dialog', { name: 'Remove question bank' });
+  const confirmRemoval = removalDialog.getByRole('button', { name: 'Remove bank', exact: true });
   const allQuestions = page.getByRole('radio', { name: 'All questions', exact: true });
   const download = page.getByRole('link', { name: 'Download quiz JSON', exact: true });
+  const importButton = page.getByRole('button', { name: 'Import quiz JSON', exact: true });
   const importInput = page.locator('#quiz-import');
   const generatedSuccess = page.getByText(/Generated My generated quiz with/);
   const temporary = page.getByText(/This quiz is available in this tab but could not be saved/);
@@ -33,10 +37,10 @@ function defineComponents(page: Page) {
   const perQuiz = page.getByRole('radio', { name: 'Whole quiz', exact: true });
   const darkMode = page.getByRole('button', { name: 'Switch to dark mode', exact: true });
   const body = page.locator('body');
-  return { generateButton, dialog, title, description, count, password, passwordHint, submit, cancel, alert, generatedBank,
-    allQuestions, download, importInput, generatedSuccess, temporary, unavailable, availabilityTooltip,
+  return { generateButton, dialog, title, description, count, password, passwordHint, submit, cancel, alert, generatedBank, removeGeneratedBank,
+    allQuestions, download, importButton, importInput, generatedSuccess, temporary, unavailable, availabilityTooltip,
     fileToolbar, fileActions, downloadSample, start, questionHeading,
-    firstAnswer, back, resume, perQuiz, darkMode, body };
+    firstAnswer, back, resume, perQuiz, darkMode, body, confirmRemoval };
 }
 
 function questions(count: number) {
@@ -61,7 +65,7 @@ async function fillGeneration(page: Page, count = 25) {
   await components.password.fill('shared-password');
 }
 
-test('generates once, selects all questions, persists locally, and downloads importable JSON', async ({ page, context, browser }) => {
+test('generates once and supports local persistence, JSON backup, and removal', async ({ page, context, browser }) => {
   const components = defineComponents(page);
   const bank = components.generatedBank();
   let calls = 0;
@@ -105,6 +109,15 @@ test('generates once, selects all questions, persists locally, and downloads imp
     await expect(isolatedComponents.start).toBeVisible();
     await expect(isolatedBank).toHaveCount(0);
   } finally { await isolated.close(); }
+
+  await components.removeGeneratedBank.click();
+  await expect(components.confirmRemoval).toBeVisible();
+  await components.confirmRemoval.click();
+  await expect(bank).toHaveCount(0);
+  await expect(otherBank).toHaveCount(0);
+  await page.reload();
+  await expect(components.importButton).toBeEnabled();
+  await expect(bank).toHaveCount(0);
 });
 
 test('validates inputs, keeps a failed form, and retries without displaying upstream text', async ({ page }) => {

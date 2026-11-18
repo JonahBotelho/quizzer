@@ -1,10 +1,11 @@
 /** Practice setup combines the bank library, session controls, and local quiz tools. */
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, RotateCcw } from 'lucide-react';
 
 import { catalog } from '../catalog';
 import { unanswered } from '../core/quiz';
 import { emptyBankSelection, selectedBank, toggleBankSelection } from '../core/bankSelection';
+import { combinedBankId } from '../core/combinedBank';
 import { resolveQuestionCount, type QuizLength } from '../core/quizLength';
 import { noTimeLimit } from '../core/timing';
 import type { TimeLimit } from '../core/timingTypes';
@@ -12,6 +13,7 @@ import type { Attempt, Bank } from '../core/types';
 import type { SaveGenerated } from '../hooks/useQuizGeneration';
 import { number, t } from '../i18n';
 import { BankPicker } from './BankPicker';
+import { BankRemovalDialog } from './BankRemovalDialog';
 import { GenerateQuiz } from './GenerateQuiz';
 import { QuizFiles } from './QuizFiles';
 import { SessionPanel } from './SessionPanel';
@@ -20,6 +22,7 @@ interface Props {
   banks: Bank[];
   importReady: boolean;
   onImport(file: File): Promise<Bank>;
+  onRemoveBank(id: string): Promise<boolean>;
   onSaveGenerated: SaveGenerated;
   active: Attempt | null;
   busy: boolean;
@@ -61,14 +64,42 @@ function ResumeSession({
 }
 
 export function Setup(props: Props) {
-  const [bankIds, setBankIds] = useState<string[]>(() =>
-    props.banks[0] ? [props.banks[0].id] : [],
-  );
+  const [selection, setSelection] = useState<string[] | null>(null);
   const [length, setLength] = useState<QuizLength>(10);
   const [limit, setLimit] = useState<TimeLimit>(noTimeLimit);
-  const [generatedName, setGeneratedName] = useState<string | null>(null);
+  const [generatedBank, setGeneratedBank] = useState<Bank | null>(null);
+  const [removal, setRemoval] = useState<{ bank: Bank; trigger: HTMLButtonElement } | null>(null);
+  const pageHeading = useRef<HTMLHeadingElement>(null);
+  const bankHeading = useRef<HTMLHeadingElement>(null);
+  const bankIds = selection ?? (props.banks[0] ? [props.banks[0].id] : []);
   const bank = useMemo(() => selectedBank(props.banks, bankIds), [props.banks, bankIds]);
-  const selectBank = (next: Bank) => setBankIds([next.id]);
+  const selectBank = (next: Bank) => setSelection([next.id]);
+
+  async function removeBank(target: Bank, trigger: HTMLButtonElement) {
+    if (!(await props.onRemoveBank(target.id))) return;
+
+    setSelection(current => (current ?? bankIds).filter(id => id !== target.id));
+
+    if (document.activeElement === trigger || document.activeElement === document.body) {
+      const hasOtherBank = props.banks.some(candidate =>
+        candidate.id !== target.id && candidate.id !== combinedBankId,
+      );
+      const focusTarget = hasOtherBank ? bankHeading.current : pageHeading.current;
+      focusTarget?.focus();
+    }
+  }
+
+  function closeRemoval(confirmed: boolean) {
+    if (!removal) return;
+
+    const { bank, trigger } = removal;
+    setRemoval(null);
+
+    const focusTarget = trigger.isConnected ? trigger : bankHeading.current ?? pageHeading.current;
+    focusTarget?.focus();
+
+    if (confirmed) void removeBank(bank, trigger);
+  }
 
   return (
     <div className="setup-content">
@@ -84,8 +115,9 @@ export function Setup(props: Props) {
         </details>
       )}
       <div className="setup-introduction">
-        <h1>{t('tagline')}</h1>
+        <h1 ref={pageHeading} tabIndex={-1}>{t('tagline')}</h1>
         <QuizFiles
+          banks={props.banks}
           ready={props.importReady}
           onImport={props.onImport}
           onImported={selectBank}
@@ -96,33 +128,38 @@ export function Setup(props: Props) {
               onGenerated={next => {
                 selectBank(next);
                 setLength('all');
-                setGeneratedName(
-                  t('generationSuccess', { name: next.name, count: number(next.questions.length) }),
-                );
+                setGeneratedBank(next);
               }}
             />
           }
         />
       </div>
-      {generatedName && (
+      {generatedBank && props.banks.some(bank => bank.id === generatedBank.id) && (
         <p className="file-success generation-success" role="status">
-          {generatedName}
+          {t('generationSuccess', {
+            name: generatedBank.name,
+            count: number(generatedBank.questions.length),
+          })}
         </p>
       )}
       {props.banks.length > 0 ? (
         <>
-          <h2 className="setup-bank-heading" id="banks-heading">{t('chooseBank')}</h2>
+          <h2 className="setup-bank-heading" id="banks-heading" ref={bankHeading} tabIndex={-1}>
+            {t('chooseBank')}
+          </h2>
           <div className="setup-layout">
             <BankPicker
               banks={props.banks}
               selected={bankIds}
-              onSelect={next => setBankIds(current => toggleBankSelection(current, next.id))}
+              removeReady={props.importReady}
+              onSelect={next => setSelection(current => toggleBankSelection(current ?? bankIds, next.id))}
+              onRequestRemove={(bank, trigger) => setRemoval({ bank, trigger })}
             />
             <SessionPanel
               bank={bank ?? emptyBankSelection()}
               length={length}
               limit={limit}
-              busy={props.busy}
+              busy={props.busy || !props.importReady}
               onLengthChange={setLength}
               onLimitChange={setLimit}
               onStart={() =>
@@ -139,6 +176,7 @@ export function Setup(props: Props) {
           <p>{t('emptyBody')}</p>
         </section>
       )}
+      {removal && <BankRemovalDialog name={removal.bank.name} onClose={closeRemoval} />}
     </div>
   );
 }

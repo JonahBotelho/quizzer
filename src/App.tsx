@@ -51,6 +51,7 @@ export function App() {
               banks={library.banks}
               importReady={library.ready}
               onImport={library.importFile}
+              onRemoveBank={library.removeBank}
               onSaveGenerated={library.saveGenerated}
               active={state.active}
               busy={state.saving}

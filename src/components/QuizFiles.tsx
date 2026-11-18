@@ -7,28 +7,29 @@ import { importErrorMessage } from '../core/importError';
 import { number, t } from '../i18n';
 
 interface Props {
+  banks: Bank[];
   ready: boolean;
   onImport(file: File): Promise<Bank>;
   onImported(bank: Bank): void;
   generation?: ReactNode;
 }
 
-export function QuizFiles({ ready, onImport, onImported, generation }: Props) {
+export function QuizFiles({ banks, ready, onImport, onImported, generation }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [importedBank, setImportedBank] = useState<Bank | null>(null);
   async function selectFile(file?: File) {
     if (!file) return;
 
     setPending(true);
     setError(null);
-    setSuccess(null);
+    setImportedBank(null);
 
     try {
       const bank = await onImport(file);
       onImported(bank);
-      setSuccess(t('importSuccess', { name: bank.name, count: number(bank.questions.length) }));
+      setImportedBank(bank);
     } catch (reason) {
       setError(importErrorMessage(reason));
     } finally {
@@ -75,9 +76,12 @@ export function QuizFiles({ ready, onImport, onImported, generation }: Props) {
           {error}
         </p>
       )}
-      {success && (
+      {importedBank && banks.some(bank => bank.id === importedBank.id) && (
         <p className="file-success" role="status">
-          {success}
+          {t('importSuccess', {
+            name: importedBank.name,
+            count: number(importedBank.questions.length),
+          })}
         </p>
       )}
     </section>

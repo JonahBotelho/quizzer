@@ -139,6 +139,15 @@ a:focus-visible, summary:focus-visible, label:has(input:focus-visible) {
 .button.secondary:hover:not(:disabled), .icon-button:hover {
   background: var(--surface-alt);
 }
+.button.destructive {
+  border-color: var(--red);
+  background: var(--red-bg);
+  color: var(--red);
+}
+.button.destructive:hover:not(:disabled) {
+  background: var(--red);
+  color: var(--red-bg);
+}
 .button.small {
   padding: 10px 14px;
 }
@@ -153,6 +162,27 @@ a:focus-visible, summary:focus-visible, label:has(input:focus-visible) {
 .icon-button {
   min-width: 44px;
   padding: 8px;
+}
+.modal-dialog {
+  width: min(var(--modal-width, 640px), calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  border: 1px solid var(--control-line);
+  border-radius: 12px;
+  padding: 28px;
+  color: var(--text);
+  background: var(--surface);
+  overflow: auto;
+}
+.modal-dialog::backdrop {
+  background: #080f1bcc;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
 }
 .grow {
   flex: 1;
@@ -236,6 +266,12 @@ a:focus-visible, summary:focus-visible, label:has(input:focus-visible) {
   h1 {
     font-size: 32px;
     letter-spacing: -1px;
+  }
+  .modal-dialog {
+    padding: 20px;
+  }
+  .modal-actions > .button {
+    flex: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

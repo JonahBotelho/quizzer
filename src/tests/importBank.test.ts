@@ -1,4 +1,4 @@
-/** Import parsing and round-trip persistence use the public question schema. */
+/** Import parsing, persistence, and removal use the public question schema. */
 import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it } from 'vitest';
 import { openDB } from 'idb';
@@ -90,5 +90,44 @@ describe('imported bank storage', () => {
     const saved = await repository.load();
     expect(saved.banks).toHaveLength(2);
     expect(saved.invalid).toBe(true);
+  });
+
+  it('removes only the requested bank across connections and allows repeat deletion', async () => {
+    const name = crypto.randomUUID();
+    const repository = await open(name);
+    const removed = importBank('remove.json', JSON.stringify(question), []);
+    const retained = importBank('retain.json', JSON.stringify(question), [removed]);
+    await repository.add(removed);
+    await repository.add(retained);
+
+    const other = await open(name);
+    await other.remove(removed.id);
+    await other.remove(removed.id);
+
+    expect((await repository.load()).banks).toEqual([retained]);
+  });
+
+  it('upgrades existing libraries and persists bundled removals separately', async () => {
+    const name = crypto.randomUUID();
+    const bank = importBank('legacy.json', JSON.stringify(question), []);
+    const legacy = await openDB(name, 1, {
+      upgrade(database) {
+        database.createObjectStore('banks', { keyPath: 'id' });
+      },
+    });
+    await legacy.add('banks', bank);
+    legacy.close();
+
+    const repository = await open(name);
+    expect(await repository.load()).toEqual({ banks: [bank], hiddenBankIds: [], invalid: false });
+    await repository.hideBundled('bundled-quiz');
+    await repository.hideBundled('bundled-quiz');
+
+    const reopened = await open(name);
+    expect(await reopened.load()).toEqual({
+      banks: [bank],
+      hiddenBankIds: ['bundled-quiz'],
+      invalid: false,
+    });
   });
 });

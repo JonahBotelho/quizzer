@@ -47,7 +47,7 @@ export function GenerationDialog({ passwordRequired, onClose, onSave, onGenerate
   return (
     <dialog
       ref={dialog}
-      className="generation-dialog"
+      className="modal-dialog generation-dialog"
       aria-labelledby="generation-heading"
       aria-describedby="generation-privacy"
       onCancel={event => {
@@ -71,7 +71,7 @@ export function GenerationDialog({ passwordRequired, onClose, onSave, onGenerate
             {flow.error}
           </p>
         )}
-        <div className="generation-actions">
+        <div className="modal-actions">
           <button
             type="button"
             className="button secondary"

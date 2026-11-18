@@ -54,6 +54,7 @@ describe('session summary', () => {
         active: null,
         busy: false,
         onImport: async () => bank,
+        onRemoveBank: async () => false,
         onSaveGenerated: async () => bank,
         onStart() {},
         onResume() {},

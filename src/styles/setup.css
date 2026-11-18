@@ -25,6 +25,11 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+.bank-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+}
 .bank-option {
   position: relative;
   display: flex;
@@ -46,6 +51,19 @@
 }
 .bank-option:hover {
   border-color: var(--accent);
+}
+.bank-card:has(.bank-remove) .bank-option {
+  padding-bottom: 68px;
+}
+.bank-remove {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 44px;
+  color: var(--red);
+}
+.bank-remove:hover:not(:disabled) {
+  background: var(--red-bg);
 }
 .bank-text {
   min-width: 0;

@@ -49,6 +49,8 @@ Generation makes one model request with no automatic retries, a 120-second deadl
 
 Choose **Import quiz JSON** to add a local file or **Download sample JSON** for an editable example. Imports accept a single question object or a nonempty array, and are saved in the current browser.
 
+Use the trash icon on a question bank and choose **Remove bank** to remove it from this browser. Sample banks and **All** stay available. Existing attempts and results keep their original questions.
+
 To bundle a bank with the app, add a UTF-8 JSON array to `src/data/quizzes/`:
 
 ```json

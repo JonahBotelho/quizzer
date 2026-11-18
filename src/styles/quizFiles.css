@@ -1,4 +1,4 @@
-/* Local quiz toolbar and backup actions. */
+/* Local quiz toolbar, backup actions, and bank removal dialog. */
 .quiz-files {
   min-width: 0;
   padding-top: 6px;
@@ -22,6 +22,14 @@
 .generated-download {
   margin-top: 16px;
 }
+.bank-removal-dialog {
+  --modal-width: 440px;
+}
+.bank-removal-dialog p {
+  margin-top: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
 @media (max-width: 1199px) {
   .file-actions > .button, .file-actions > .generation-entry {
     flex: 0 1 auto;
@@ -31,6 +39,10 @@
   }
 }
 @media (max-width: 767px) {
+  .bank-removal-dialog .modal-actions > .button {
+    flex-basis: auto;
+    padding-inline: 12px;
+  }
   .file-actions {
     flex-direction: column;
     align-items: stretch;
