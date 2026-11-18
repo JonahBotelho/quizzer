@@ -28,7 +28,6 @@ function defineComponents(page: Page) {
   const code = codeBlocks.last();
   const firstCodeBlock = codeBlocks.first();
   const feedback = page.locator('.answer-feedback');
-  const saveStatus = page.locator('.save-status');
   const resumeButton = page.getByRole('button', { name: 'Resume quiz', exact: true });
 
   return {
@@ -57,7 +56,6 @@ function defineComponents(page: Page) {
     code,
     firstCodeBlock,
     feedback,
-    saveStatus,
     resumeButton,
   };
 }
@@ -115,7 +113,7 @@ test('mixed content is literal, ordered, resumable, and visible in saved reviews
 
   await components.firstAnswerOption.check();
   await expect(components.feedback).toContainText('Incorrect');
-  await expect(components.saveStatus).toHaveText('Saved on this browser');
+  await expect(components.finishButton).toBeEnabled();
   await page.reload();
 
   await components.resumeButton.click();

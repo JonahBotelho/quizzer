@@ -15,7 +15,6 @@ interface Props {
 export function BankPicker({ banks, selected, onSelect }: Props) {
   return (
     <section className="bank-library" aria-labelledby="banks-heading">
-      <h2 id="banks-heading">{t('chooseBank')}</h2>
       <div className="bank-grid" role="group" aria-labelledby="banks-heading">
         {banks.map(bank => (
           <label

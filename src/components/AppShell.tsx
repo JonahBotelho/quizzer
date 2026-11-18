@@ -1,6 +1,6 @@
-/** Studio navigation, appearance controls, and browser-local persistence status. */
+/** Studio navigation, appearance controls, and privacy footer. */
 import type { ReactNode } from 'react';
-import { CheckCheck, CircleAlert, History, LockKeyhole, Moon, Play, Sun } from 'lucide-react';
+import { History, LockKeyhole, Moon, Play, Sun } from 'lucide-react';
 
 import { useTheme } from '../hooks/useTheme';
 import { number, t } from '../i18n';
@@ -8,24 +8,9 @@ import { number, t } from '../i18n';
 interface Props {
   historySelected: boolean;
   historyCount: number;
-  persistent: boolean;
-  saving: boolean;
   onPractice(): void;
   onHistory(): void;
   children: ReactNode;
-}
-
-function SaveStatus({ persistent, saving }: Pick<Props, 'persistent' | 'saving'>) {
-  return (
-    <span className={'save-status ' + (!persistent ? 'unsaved' : '')} role="status">
-      {persistent ? (
-        <CheckCheck size={18} aria-hidden="true" />
-      ) : (
-        <CircleAlert size={18} aria-hidden="true" />
-      )}
-      {t(!persistent ? 'memory' : saving ? 'saving' : 'saved')}
-    </span>
-  );
 }
 
 function Navigation(props: Omit<Props, 'children'>) {
@@ -58,23 +43,20 @@ function Navigation(props: Omit<Props, 'children'>) {
             )}
           </button>
         </nav>
-        <div className="sidebar-bottom">
-          <button
-            className="theme-toggle"
-            data-theme={theme}
-            aria-label={t(theme === 'dark' ? 'themeLight' : 'themeDark')}
-            onClick={toggle}
-          >
-            <span className="theme-toggle-track" aria-hidden="true">
-              <Sun size={18} />
-              <Moon size={18} />
-            </span>
-            <span className="theme-toggle-thumb" aria-hidden="true">
-              {theme === 'light' ? <Sun size={19} /> : <Moon size={19} />}
-            </span>
-          </button>
-          <SaveStatus persistent={props.persistent} saving={props.saving} />
-        </div>
+        <button
+          className="theme-toggle"
+          data-theme={theme}
+          aria-label={t(theme === 'dark' ? 'themeLight' : 'themeDark')}
+          onClick={toggle}
+        >
+          <span className="theme-toggle-track" aria-hidden="true">
+            <Sun size={18} />
+            <Moon size={18} />
+          </span>
+          <span className="theme-toggle-thumb" aria-hidden="true">
+            {theme === 'light' ? <Sun size={19} /> : <Moon size={19} />}
+          </span>
+        </button>
       </div>
     </header>
   );

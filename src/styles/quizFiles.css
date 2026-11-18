@@ -1,4 +1,4 @@
-/* Local quiz toolbar, expandable format help, and backup actions. */
+/* Local quiz toolbar and backup actions. */
 .quiz-files {
   min-width: 0;
   padding-top: 6px;
@@ -15,21 +15,6 @@
 .file-actions > .button, .file-actions > .generation-entry > .button {
   width: 100%;
   min-height: 72px;
-}
-.file-format-help {
-  margin-top: 12px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.file-format-help summary {
-  cursor: pointer;
-  min-height: 44px;
-  display: list-item;
-  align-content: center;
-}
-.file-format-hint {
-  margin-top: 8px;
-  overflow-wrap: anywhere;
 }
 .generation-success {
   margin-bottom: 24px;

@@ -37,13 +37,11 @@ function defineComponents(page: Page) {
   const clearHistoryButton = page.getByRole('button', { name: 'Clear history' });
   const storageNotice = page.getByText(/Browser storage is unavailable/);
   const perfectScorePercentage = page.getByText('100.0%', { exact: true });
-  const memoryStatus = page.getByText('Not saved · this tab only', { exact: true });
   const discardButton = page.getByRole('button', { name: 'Discard', exact: true });
   const bankSelectionHeading = page.getByRole('heading', { name: 'Choose your question banks' });
   const brandButton = page.getByRole('button', { name: 'quizzer', exact: true });
   const body = page.locator('body');
   const darkModeButton = page.getByRole('button', { name: 'Switch to dark mode' });
-  const saveStatus = page.locator('.save-status');
 
   return {
     allBanksOption,
@@ -75,13 +73,11 @@ function defineComponents(page: Page) {
     clearHistoryButton,
     storageNotice,
     perfectScorePercentage,
-    memoryStatus,
     discardButton,
     bankSelectionHeading,
     brandButton,
     body,
     darkModeButton,
-    saveStatus,
   };
 }
 
@@ -149,7 +145,7 @@ test('keeps the first answer final and resumes on refresh', async ({ page }) => 
   await expect(components.secondAnswerOption).toBeDisabled();
   await components.nextButton.click();
   await expect(components.questionPosition).toBeVisible();
-  await expect(components.saveStatus).toHaveText('Saved on this browser');
+  await expect(components.previousButton).toBeEnabled();
   await page.reload();
 
   await expect(components.bankSelectionHeading).toBeVisible();
@@ -202,7 +198,7 @@ test('storage unavailable still permits completion in memory', async ({ page }) 
   await complete(page);
 
   await expect(components.perfectScorePercentage).toBeVisible();
-  await expect(components.memoryStatus).toBeVisible();
+  await expect(components.storageNotice).toBeVisible();
 });
 test('tabs share active progress and cannot resurrect a discarded attempt', async ({
   page,

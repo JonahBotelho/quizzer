@@ -47,7 +47,7 @@ Generation makes one model request with no automatic retries, a 120-second deadl
 
 ## Quiz files
 
-Choose **Import quiz JSON** to add a local file or **Download sample JSON** for an editable example. Expand **About quiz JSON files** below these actions for format guidance. Imports accept a single question object or a nonempty array, and are saved in the current browser.
+Choose **Import quiz JSON** to add a local file or **Download sample JSON** for an editable example. Imports accept a single question object or a nonempty array, and are saved in the current browser.
 
 To bundle a bank with the app, add a UTF-8 JSON array to `src/data/quizzes/`:
 

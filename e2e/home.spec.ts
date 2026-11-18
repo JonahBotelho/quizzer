@@ -1,10 +1,14 @@
-/** Startup reconciles saved attempts without redirecting away from the home screen. */
+/** Verify the home layout and how startup reconciles saved attempts. */
 import { expect, test, type Page } from '@playwright/test';
 
 import type { Attempt } from '../src/core/types';
 
 function defineComponents(page: Page) {
   const bankHeading = page.getByRole('heading', { name: 'Choose your question banks' });
+  const bankGrid = page.getByRole('group', { name: 'Choose your question banks' });
+  const session = page.getByRole('region', { name: 'Your session' });
+  const practiceHeading = page.getByRole('heading', { name: 'Practice Quizzes', level: 1 });
+  const formatHelp = page.getByText('About quiz JSON files', { exact: true });
   const resume = page.getByRole('button', { name: 'Resume quiz', exact: true });
   const resultsHeading = page.getByRole('heading', { name: 'Practice makes progress.' });
   const historyCount = page.locator('.nav-count');
@@ -12,8 +16,26 @@ function defineComponents(page: Page) {
   const viewResults = page.getByRole('button', { name: 'View results' });
   const timeoutNotice = page.getByText('Time ran out. Answers given in time were scored; unanswered questions count as incorrect.');
 
-  return { bankHeading, resume, resultsHeading, historyCount, history, viewResults, timeoutNotice };
+  return {
+    bankHeading, bankGrid, session, practiceHeading, formatHelp, resume,
+    resultsHeading, historyCount, history, viewResults, timeoutNotice,
+  };
 }
+
+test('practice home shows its heading and aligned cards without file help', async ({ page }) => {
+  const { bankHeading, bankGrid, session, practiceHeading, formatHelp } = defineComponents(page);
+
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await page.goto('/');
+
+  await expect(practiceHeading).toBeVisible();
+  await expect(bankHeading).toBeVisible();
+  await expect(formatHelp).toHaveCount(0);
+  await expect.poll(async () => {
+    const [banks, sessionCard] = await Promise.all([bankGrid.boundingBox(), session.boundingBox()]);
+    return banks && sessionCard ? banks.y - sessionCard.y : null;
+  }).toBe(0);
+});
 
 test('a quiz that expired while closed is saved to History and opens on home', async ({ page }) => {
   const components = defineComponents(page);

@@ -70,10 +70,6 @@ export function QuizFiles({ ready, onImport, onImported, generation }: Props) {
           void selectFile(event.target.files?.[0]);
         }}
       />
-      <details className="file-format-help">
-        <summary>{t('importHelp')}</summary>
-        <p className="file-format-hint">{t('importFormatHint')}</p>
-      </details>
       {error && (
         <p className="file-error" role="alert">
           {error}

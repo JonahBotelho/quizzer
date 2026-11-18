@@ -84,9 +84,7 @@ export function Setup(props: Props) {
         </details>
       )}
       <div className="setup-introduction">
-        <div className="setup-heading">
-          <h1>{t('tagline')}</h1>
-        </div>
+        <h1>{t('tagline')}</h1>
         <QuizFiles
           ready={props.importReady}
           onImport={props.onImport}
@@ -112,25 +110,28 @@ export function Setup(props: Props) {
         </p>
       )}
       {props.banks.length > 0 ? (
-        <div className="setup-layout">
-          <BankPicker
-            banks={props.banks}
-            selected={bankIds}
-            onSelect={next => setBankIds(current => toggleBankSelection(current, next.id))}
-          />
-          <SessionPanel
-            bank={bank ?? emptyBankSelection()}
-            length={length}
-            limit={limit}
-            busy={props.busy}
-            onLengthChange={setLength}
-            onLimitChange={setLimit}
-            onStart={() =>
-              bank &&
-              props.onStart(bank, resolveQuestionCount(length, bank.questions.length), limit)
-            }
-          />
-        </div>
+        <>
+          <h2 className="setup-bank-heading" id="banks-heading">{t('chooseBank')}</h2>
+          <div className="setup-layout">
+            <BankPicker
+              banks={props.banks}
+              selected={bankIds}
+              onSelect={next => setBankIds(current => toggleBankSelection(current, next.id))}
+            />
+            <SessionPanel
+              bank={bank ?? emptyBankSelection()}
+              length={length}
+              limit={limit}
+              busy={props.busy}
+              onLengthChange={setLength}
+              onLimitChange={setLimit}
+              onStart={() =>
+                bank &&
+                props.onStart(bank, resolveQuestionCount(length, bank.questions.length), limit)
+              }
+            />
+          </div>
+        </>
       ) : (
         <section className="empty-state">
           <BookOpen size={40} aria-hidden="true" />

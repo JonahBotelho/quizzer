@@ -19,8 +19,6 @@ export function App() {
     <AppShell
       historySelected={screen === 'history'}
       historyCount={state.history.length}
-      persistent={state.persistent}
-      saving={state.saving}
       onPractice={flow.showSetup}
       onHistory={flow.showHistory}
     >

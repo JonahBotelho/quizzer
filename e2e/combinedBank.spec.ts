@@ -17,6 +17,7 @@ function defineComponents(page: Page) {
   const questionPosition = page.getByText(`Question 1 of ${bundledCount}`, { exact: true });
   const questionNavigation = page.getByRole('navigation', { name: 'Your questions' });
   const questionButtons = questionNavigation.getByRole('button');
+  const firstQuestionButton = questionButtons.first();
   const questionHeading = page.locator('#question-heading');
   const answerOptions = page.getByRole('radio');
   const firstAnswerOption = answerOptions.first();
@@ -31,7 +32,6 @@ function defineComponents(page: Page) {
   const twentyFiveQuestionsOption = page.getByRole('radio', { name: '25 questions', exact: true });
   const fixedLengthQuestionPosition = page.getByText('Question 1 of 25', { exact: true });
   const feedback = page.locator('.answer-feedback');
-  const saveStatus = page.locator('.save-status');
   const resumeButton = page.getByRole('button', { name: 'Resume quiz', exact: true });
 
   return {
@@ -45,6 +45,7 @@ function defineComponents(page: Page) {
     questionPosition,
     questionNavigation,
     questionButtons,
+    firstQuestionButton,
     questionHeading,
     answerOptions,
     firstAnswerOption,
@@ -56,7 +57,6 @@ function defineComponents(page: Page) {
     twentyFiveQuestionsOption,
     fixedLengthQuestionPosition,
     feedback,
-    saveStatus,
     resumeButton,
   };
 }
@@ -90,7 +90,7 @@ test('all banks and all questions survive refresh, timed completion, and repeat'
 
   await components.firstAnswerOption.check();
   await expect(components.feedback).not.toBeEmpty();
-  await expect(components.saveStatus).toHaveText('Saved on this browser');
+  await expect(components.firstQuestionButton).toBeEnabled();
   await page.reload();
   await expect(components.banks).toBeVisible();
   await components.resumeButton.click();

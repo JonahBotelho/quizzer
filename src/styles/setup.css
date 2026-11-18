@@ -1,23 +1,19 @@
-/* Bank tiles and the session builder use normal flow so expanded help stays reachable. */
-.setup-introduction {
+/* Practice introduction, aligned bank tiles, and session controls. */
+.setup-introduction, .setup-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.18fr) minmax(360px, 1fr);
   gap: 24px;
   align-items: start;
+}
+.setup-introduction {
   margin-bottom: 48px;
 }
-.setup-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.18fr) minmax(360px, 1fr);
-  align-items: start;
-  gap: 24px;
+.setup-bank-heading {
+  margin-bottom: 24px;
 }
 .bank-library {
   min-width: 0;
   container-type: inline-size;
-}
-.bank-library > h2 {
-  margin-bottom: 24px;
 }
 .bank-grid {
   display: grid;

@@ -20,20 +20,15 @@ function defineComponents(page: Page) {
   const duration = session.getByLabel('Seconds per question', { exact: true });
   const timeError = session.getByRole('alert');
   const start = session.getByRole('button', { name: 'Start practising', exact: true });
-  const help = page.locator('.file-format-help');
-  const helpToggle = help.getByText('About quiz JSON files', { exact: true });
-  const format = help.locator('.file-format-hint');
   const importInput = page.locator('#quiz-import');
   const fileActions = page.locator('.file-actions');
   const toolbarActions = fileActions.locator('button, a');
   const toolbarActionAt = (index: number) => toolbarActions.nth(index);
-  const saveStatus = page.locator('.save-status');
   const questionHeading = page.locator('#question-heading');
-  const importError = page.getByRole('alert');
 
   return { root, body, header, mainNavigation, themeToggle, banks, bankOptions,
     firstBank, secondBank, bankOption, session, summary, fifty, perQuestion, duration, timeError,
-    start, help, helpToggle, format, importInput, toolbarActionAt, saveStatus, questionHeading, importError };
+    start, importInput, toolbarActionAt, questionHeading };
 }
 
 test('system theme follows changes until a toggle choice is saved', async ({ page }) => {
@@ -139,23 +134,6 @@ test('bank and timer keyboard controls update the session and retain validation'
   await expect(components.questionHeading).toBeFocused();
 });
 
-test('format guidance expands independently of import errors', async ({ page }) => {
-  const components = defineComponents(page);
-
-  await page.goto('/');
-  await expect(components.format).toBeHidden();
-  await components.helpToggle.click();
-  await expect(components.format).toContainText('Answers start at 1');
-  await components.helpToggle.click();
-  await expect(components.format).toBeHidden();
-  await components.importInput.setInputFiles({
-    name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{'),
-  });
-
-  await expect(components.importError).toBeVisible();
-  await expect(components.help).not.toHaveAttribute('open');
-});
-
 test('real and long imported banks fit both palettes at every layout boundary', async ({ page }, testInfo) => {
   const components = defineComponents(page);
   const name = 'A very long imported programming practice collection with detailed reference material';
@@ -181,7 +159,6 @@ test('real and long imported banks fit both palettes at every layout boundary', 
       await page.setViewportSize({ width, height: 900 });
       await expect(components.mainNavigation).toHaveCount(1);
       await expect(components.themeToggle).toHaveCount(1);
-      await expect(components.saveStatus).toBeVisible();
       await expect.poll(() => components.body.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0);
 
       for (let index = 0; index < 3; index++) {

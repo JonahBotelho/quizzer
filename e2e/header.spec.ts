@@ -15,6 +15,8 @@ function defineComponents(page: Page) {
   });
   const body = page.locator('body');
   const documentRoot = page.locator('html');
+  const header = page.getByRole('banner');
+  const saveStatus = header.getByText('Saved on this browser', { exact: true });
   const headerControls = page.locator('.brand,.main-nav button,.theme-toggle');
   const historyHeading = (name: string | RegExp) =>
     page.getByRole('heading', {
@@ -30,6 +32,7 @@ function defineComponents(page: Page) {
     practiceNavigationButton,
     body,
     documentRoot,
+    saveStatus,
     headerControls,
     historyHeading,
   };
@@ -56,6 +59,7 @@ for (const viewport of [
     await page.goto('/');
 
     await expect(components.bankSelectionHeading).toBeVisible();
+    await expect(components.saveStatus).toHaveCount(0);
 
     const measure = async () => {
       const [width, overflowing, header] = await Promise.all([

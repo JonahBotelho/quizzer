@@ -1,11 +1,9 @@
 {
   "filesTitle": "Bring your own questions",
-  "importHelp": "About quiz JSON files",
   "filesHint": "Import a quiz, or download an example to get started.",
   "importQuiz": "Import quiz JSON",
   "importingQuiz": "Importing…",
   "downloadSample": "Download sample JSON",
-  "importFormatHint": "Use an array of questions with id, question, options, and answer. A question can be text or an ordered array of text/code blocks. Answers start at 1: an answer of 3 means the third option.",
   "importedBadge": "Imported",
   "importSuccess": "Imported {name} with {count} questions.",
   "importFileType": "Choose a .json file.",
